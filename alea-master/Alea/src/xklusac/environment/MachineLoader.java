@@ -96,6 +96,7 @@ public class MachineLoader {
             int totalMachine = Integer.parseInt(values[2]);
             int totalPE = Integer.parseInt(values[3]);
             int peRating = Integer.parseInt(values[4]);
+            cost = Integer.parseInt(values[6]);
             String name = values[1];
 
             // for JobLoader's purposes

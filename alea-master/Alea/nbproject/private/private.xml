@@ -3,19 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/PHD/alea-master/alea-master/Alea/src/xklusac/environment/ComplexGridResource.java</file>
-            <file>file:/D:/PHD/alea-master/alea-master/Alea/src/xklusac/environment/JobLoader.java</file>
-            <file>file:/D:/PHD/alea-master/alea-master/Alea/src/xklusac/environment/SWFLoader.java</file>
-            <file>file:/D:/PHD/alea-master/alea-master/Alea/src/alea/core/WorkloadReaderSWF.java</file>
-            <file>file:/D:/PHD/alea-master/alea-master/Alea/src/xklusac/environment/AdvancedSpaceSharedWithRAM.java</file>
-            <file>file:/D:/PHD/alea-master/alea-master/Alea/src/xklusac/environment/AleaConfiguration.java</file>
-            <file>file:/D:/PHD/alea-master/alea-master/Alea/src/xklusac/environment/ExperimentSetup.java</file>
-            <file>file:/D:/PHD/alea-master/alea-master/Alea/src/xklusac/environment/Scheduler.java</file>
-            <file>file:/D:/PHD/alea-master/alea-master/Alea/src/xklusac/environment/ComplexResourceCharacteristics.java</file>
-            <file>file:/D:/PHD/alea-master/alea-master/Alea/src/xklusac/environment/MachineWithRAM.java</file>
-            <file>file:/D:/PHD/alea-master/alea-master/Alea/src/xklusac/environment/ComplexGridlet.java</file>
-            <file>file:/D:/PHD/alea-master/alea-master/Alea/src/alea/dynamic/JobBatchStatic.java</file>
-            <file>file:/D:/PHD/alea-master/alea-master/Alea/src/xklusac/environment/MWFLoader.java</file>
+            <file>file:/D:/PHD/alea-master/CCC/alea-master/Alea/src/xklusac/environment/MachineLoader.java</file>
+            <file>file:/D:/PHD/alea-master/CCC/alea-master/Alea/src/xklusac/environment/ExperimentSetup.java</file>
+            <file>file:/D:/PHD/alea-master/CCC/alea-master/Alea/src/alea/core/WorkloadReaderSWF.java</file>
         </group>
     </open-files>
 </project-private>
