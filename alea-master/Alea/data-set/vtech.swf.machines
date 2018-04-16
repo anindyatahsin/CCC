@@ -1,13 +1,13 @@
 0	Blueridge0	130	16	1	67108864	3	mic
-1	Blueridge1	4	16	1	67108864	5	gpu
+1	Blueridge1	4	16	1	67108864	5	gpus
 2	Blueridge2	256	16	1	67108864	2	
 3	Blueridge3	18	16	1	134217728	2	highmem	
 4	Cascades0	2	72	1	3221225472	3	largemem
-5	Cascades1	4	32	1	536870912	5	gpu
+5	Cascades1	4	32	1	536870912	5	gpus
 6	Cascades2	190	32	1	134217728	2	
 7	DragonsTooth	48	24	1	268435456	1
 8	NewRiver0	2	60	1	3221225472	3	largemem
-9	NewRiver1	39	28	1	536870912	5	gpu
-10	NewRiver2	8	24	1	536870912	5	gpu
+9	NewRiver1	39	28	1	536870912	5	gpus
+10	NewRiver2	8	24	1	536870912	5	gpus
 11	NewRiver3	16	24	1	536870912	2
 12	NewRiver4	100	24	1	134217728	2

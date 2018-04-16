@@ -180,7 +180,7 @@ public class ResultCollector {
 
         try {
             out.writeString(user_dir + "/Results(" + problem + ").csv", "1/" + data_set
-                    + "\tsubmit.\tcompl.\tkilled\tresp_time\truntime\tsch-cr-time\tmakespan\tweigh_usg\tclass_usg\ttardiness\twait\tsld\tawrt\tawsd\ts_resp\ts_wait\ts_sld\tbounded_sld\tbackfilled" + headersOfPlugins);
+                    + ",submit.,compl.,killed,resp_time,runtime,sch-cr-time,makespan,weigh_usg,class_usg,tardiness,wait,sld,awrt,awsd,s_resp,s_wait,s_sld,bounded_sld,backfilled" + headersOfPlugins);
             out.writeString(user_dir + "/WGraphs(" + problem + ").csv", waxis);
             out.writeString(user_dir + "/SGraphs(" + problem + ").csv", saxis);
             out.writeString(user_dir + "/RGraphs(" + problem + ").csv", raxis);
@@ -306,25 +306,25 @@ public class ResultCollector {
             }
 
             out.writeString(user_dir + "/Users" + prob + ".csv", fair);
-            out.writeString(user_dir + "/Results(" + problem + ").csv", suff + "\t"
-                    + Math.round(submitted * 100.0) / (experiment_count * 100.0) + "\t"
-                    + Math.round(completed_jobs * 100.0) / (experiment_count * 100.0) + "\t"
-                    + Math.round(neg_score * 100.0) / (experiment_count * 100.0) + "\t"
-                    + Math.round(flow_time * 100) / (experiment_count * 100.0) + "\t"
-                    + Math.round(avg_time * 100.0) / (experiment_count * 100.0) + "\t"
-                    + Math.round(creation_time * 100.0) / (experiment_count * 100.0) + "\t"
-                    + Math.round(avg_makespan) / (experiment_count) + "\t"
-                    + Math.round(machine_usage * 100.0) / (experiment_count * 100.0) + "\t"
-                    + Math.round(classic_usage * 100.0) / (experiment_count * 100.0) + "\t"
-                    + Math.round(tardiness * 100.0) / (experiment_count * 100.0) + "\t"
-                    + Math.round(wait_time * 100.0) / (experiment_count * 100.0) + "\t"
-                    + Math.round(slowdown * 100.0) / (experiment_count * 100.0) + "\t"
-                    + Math.round(awrt * 100.0) / (experiment_count * 100.0) + "\t"
-                    + Math.round(awsd * 100.0) / (experiment_count * 100.0) + "\t"
-                    + Math.round(succ_flow * 100.0) / (experiment_count * 100.0) + "\t"
-                    + Math.round(succ_wait * 100.0) / (experiment_count * 100.0) + "\t"
-                    + Math.round(succ_slow * 100.0) / (experiment_count * 100.0) + "\t"
-                    + Math.round(b_succ_slow * 100.0) / (experiment_count * 100.0) + "\t"
+            out.writeString(user_dir + "/Results(" + problem + ").csv", suff + ","
+                    + Math.round(submitted * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(completed_jobs * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(neg_score * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(flow_time * 100) / (experiment_count * 100.0) + ","
+                    + Math.round(avg_time * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(creation_time * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(avg_makespan) / (experiment_count) + ","
+                    + Math.round(machine_usage * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(classic_usage * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(tardiness * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(wait_time * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(slowdown * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(awrt * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(awsd * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(succ_flow * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(succ_wait * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(succ_slow * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(b_succ_slow * 100.0) / (experiment_count * 100.0) + ","
                     + Math.round(backfilled * 100.0) / (experiment_count * 100.0)
                     + pluginResultString);
 
@@ -389,7 +389,7 @@ public class ResultCollector {
             this.pw2 = new PrintWriter(new FileWriter(FileUtil.getPath(user_dir + "/jobs(" + problem + "" + ExperimentSetup.algID + ").csv"), true));
             this.pwc = new PrintWriter(new FileWriter(FileUtil.getPath(user_dir + "/complain(" + problem + "" + ExperimentSetup.algID + ").csv"), true));
 
-            out.writeStringWriter(pw, "giID \t arrival \t wait \t runtime \t CPUs \t RAM \t userID \t queue");
+            out.writeStringWriter(pw, "giID , arrival , wait , runtime , CPUs , RAM , userID , queue");
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -475,8 +475,8 @@ public class ResultCollector {
         // write out jobs 
         try {
             // giID - wait - runtime - userID - numPE - ram - arrival - queue
-            out.writeStringWriterErr(pw2, gridlet_received.getGridletID() + "\t" + Math.max(0.0, (response - cpu_time))
-                    + "\t" + cpu_time + "\t" + gi.getUser() + "\t" + gi.getNumPE() + "\t" + gi.getRam() + "\t" + gi.getRelease_date() + "\t" + gi.getQueue());
+            out.writeStringWriterErr(pw2, gridlet_received.getGridletID() + "," + Math.max(0.0, (response - cpu_time))
+                    + "," + cpu_time + "," + gi.getUser() + "," + gi.getNumPE() + "," + gi.getRam() + "," + gi.getRelease_date() + "," + gi.getQueue());
             String prob = "_";
             prob += ExperimentSetup.algID + "_" + ExperimentSetup.name;
 
@@ -492,12 +492,12 @@ public class ResultCollector {
                 prob += "_stradani";
             }
 
-            String line = gridlet_received.getGridletID() + "\t" + Math.round(gi.getRelease_date()) + "\t" + Math.round(Math.max(0.0, (response - cpu_time)) * 10) / 10.0
-                    + "\t" + Math.round(cpu_time * 10) / 10.0 + "\t" + gi.getNumPE() + "\t" + gi.getRam() + "\t" + gi.getUser() + "\t" + gi.getQueue();
+            String line = gridlet_received.getGridletID() + "," + Math.round(gi.getRelease_date()) + "," + Math.round(Math.max(0.0, (response - cpu_time)) * 10) / 10.0
+                    + "," + Math.round(cpu_time * 10) / 10.0 + "," + gi.getNumPE() + "," + gi.getRam() + "," + gi.getUser() + "," + gi.getQueue();
 
             //out.writeStringWriter(user_dir + "/jobs" + prob + ".csv", line.replace(".", ","));
-            out.writeStringWriter(pw, line.replace(".", ","));
-
+            //out.writeStringWriter(pw, line.replace(".", ","));
+            out.writeStringWriter(pw, line);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -662,7 +662,7 @@ public class ResultCollector {
             if (line == null) {
                 break;
             } else {
-                String values[] = line.split("\t");
+                String values[] = line.split(",");
                 //System.out.print(values[0] + ", ");
                 double wait = Double.parseDouble(values[1]);
                 double sld = Math.max(1.0, (Math.max(0.0, (wait + Double.parseDouble(values[2]))) / Math.max(1.0, Double.parseDouble(values[2]))));
