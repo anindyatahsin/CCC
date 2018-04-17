@@ -57,6 +57,7 @@ public class ResultCollector {
     double day_usage = 0.0;
     double week_usage = 0.0;
     int week_count = 0;
+    double value = 0;
     //double run_time = 0.0;
     /**
      * denotes total flow time
@@ -180,7 +181,7 @@ public class ResultCollector {
 
         try {
             out.writeString(user_dir + "/Results(" + problem + ").csv", "1/" + data_set
-                    + ",submit.,compl.,killed,resp_time,runtime,sch-cr-time,makespan,weigh_usg,class_usg,tardiness,wait,sld,awrt,awsd,s_resp,s_wait,s_sld,bounded_sld,backfilled" + headersOfPlugins);
+                    + ",submit.,compl.,killed,resp_time,runtime,sch-cr-time,makespan,weigh_usg,class_usg,tardiness,wait,sld,awrt,awsd,s_resp,s_wait,s_sld,bounded_sld,backfilled, value," + headersOfPlugins);
             out.writeString(user_dir + "/WGraphs(" + problem + ").csv", waxis);
             out.writeString(user_dir + "/SGraphs(" + problem + ").csv", saxis);
             out.writeString(user_dir + "/RGraphs(" + problem + ").csv", raxis);
@@ -325,7 +326,8 @@ public class ResultCollector {
                     + Math.round(succ_wait * 100.0) / (experiment_count * 100.0) + ","
                     + Math.round(succ_slow * 100.0) / (experiment_count * 100.0) + ","
                     + Math.round(b_succ_slow * 100.0) / (experiment_count * 100.0) + ","
-                    + Math.round(backfilled * 100.0) / (experiment_count * 100.0)
+                    + Math.round(backfilled * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(value * 100.0) / (experiment_count * 100.0) + ","
                     + pluginResultString);
 
         } catch (IOException ex) {
@@ -458,7 +460,7 @@ public class ResultCollector {
         job_time += gi.getNumPE() * cpu_time;
         wjob_time += gi.getNumPE() * gridlet_received.getGridletFinishedSoFar();
         flow_time += response;
-
+        value += gi.getNumPE() * gi.getLength() / 3600;
         //interates all plugins and cumulates their value
         for (Plugin pl : plugins) {
             pl.cumulate(gridlet_received);
@@ -476,7 +478,7 @@ public class ResultCollector {
         try {
             // giID - wait - runtime - userID - numPE - ram - arrival - queue
             out.writeStringWriterErr(pw2, gridlet_received.getGridletID() + "," + Math.max(0.0, (response - cpu_time))
-                    + "," + cpu_time + "," + gi.getUser() + "," + gi.getNumPE() + "," + gi.getRam() + "," + gi.getRelease_date() + "," + gi.getQueue());
+                    + "," + cpu_time + "," + gi.getUser() + "," + gi.getNumPE() + "," + gi.getRam() + "," + gi.getRelease_date() + "," + gi.getQueue() );
             String prob = "_";
             prob += ExperimentSetup.algID + "_" + ExperimentSetup.name;
 

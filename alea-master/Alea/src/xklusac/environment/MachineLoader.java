@@ -144,7 +144,7 @@ public class MachineLoader {
 
             double time_zone = 0.0;         // time zone this resource located
 
-            String properties = "";
+            String properties = values[7];
 
             //name = name;
             name_id++;
