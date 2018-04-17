@@ -181,7 +181,7 @@ public class SWFLoader extends GridSim {
                     ex.printStackTrace();
                 }
                 if (!values[0].contains(";")) {
-                    if (line.charAt(0) == ' ') {
+                    /*if (line.charAt(0) == ' ') {
                         line = line.substring(1);
                     }
                     if (line.charAt(0) == ' ') {
@@ -192,7 +192,7 @@ public class SWFLoader extends GridSim {
                     }
                     if (line.charAt(0) == ' ') {
                         line = line.substring(1);
-                    }
+                    }*/
                     values = line.split("\\s+");
                     break;
                 } else {
@@ -203,7 +203,7 @@ public class SWFLoader extends GridSim {
             try {
                 line = br.readLine();
                 //System.out.println(">"+line+"<");
-                if (line.charAt(0) == ' ') {
+                /*if (line.charAt(0) == ' ') {
                     line = line.substring(1);
                 }
                 if (line.charAt(0) == ' ') {
@@ -214,7 +214,7 @@ public class SWFLoader extends GridSim {
                 }
                 if (line.charAt(0) == ' ') {
                     line = line.substring(1);
-                }
+                }*/
                 //System.out.println("error1 = "+line+" at gi = "+j);
                 values = line.split("\\s+");
 
@@ -360,10 +360,27 @@ public class SWFLoader extends GridSim {
         int numNodes = -1;
         int ppn = -1;
         String properties = "";
-        if (values.length > 20) {
-            properties = values[20];
+        try{
+            numNodes = Integer.parseInt(values[16]);
+        }catch(NumberFormatException e){
+            String[] s = values[16].split("\\+");
+            numNodes = s.length;
+            System.out.println("Job " + id + " requested node " + s[0] + " and length " + numNodes);
+        }
+        ppn = Integer.parseInt(values[17]); 
+        if (values.length > 19) {
+            if(!values[19].equals("-1")){
+                properties = values[19].split("=")[0];
+                if(queue.contains("normal") || queue.contains("dev") || queue.contains("vis") || queue.contains("open")){
+                    properties += "," + queue;
+                }
+            }
+            else if(queue.contains("normal") || queue.contains("dev") || queue.contains("vis") || queue.contains("open")){
+                properties += queue;
+            }
+               
 
-            if (data_set.contains("wagap") || data_set.contains("meta") || data_set.contains("ncbr") || data_set.contains("fairshare")) {
+            /*if (data_set.contains("wagap") || data_set.contains("meta") || data_set.contains("ncbr") || data_set.contains("fairshare")) {
                 String[] req_nodes = values[20].split(":");
                 properties = values[20];
                 for (int r = 0; r < req_nodes.length; r++) {
@@ -403,7 +420,8 @@ public class SWFLoader extends GridSim {
                     ppn = numCPU;
                 }
                 //System.out.println(id+" | "+values[20]+" nodes="+numNodes+" ppn="+ppn);
-            } else if (data_set.contains("zewura")) {
+            }*/ 
+            if (data_set.contains("zewura")) {
                 numNodes = 1;
                 ppn = numCPU;
             } else if (data_set.contains("hpc2n")) {
@@ -468,6 +486,9 @@ public class SWFLoader extends GridSim {
 
         // manually established - fix it according to your needs
         double deadline = job_limit * 2;
+        //System.out.println("creating job:" + id + " " + user + " " + job_limit + " " + new Double(length) + " " + estimatedLength + " " + 10 + " " + 10 + " " +
+        //        "Linux" + " " + "Risc arch." + " " + arrival + " " + deadline + " " + 1 + " " + numCPU + " " + 0.0 + " " + queue + " " + properties + " " + perc + " " + ram + " " + numNodes + " " + ppn);
+        
         ComplexGridlet gl = new ComplexGridlet(id, user, job_limit, new Double(length), estimatedLength, 10, 10,
                 "Linux", "Risc arch.", arrival, deadline, 1, numCPU, 0.0, queue, properties, perc, ram, numNodes, ppn);
 
