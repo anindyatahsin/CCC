@@ -140,6 +140,38 @@ public class Scheduler extends GridSim {
      */
     public static LinkedList cpmd_queue = new LinkedList();
     /**
+     * incoming job queue
+    */
+    public static LinkedList normal_q = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList open_q = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList dev_q = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList vis_q = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList lab_q = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList largemem_q = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList p100_normal_q = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList p100_dev_q = new LinkedList();
+    /**
      * List of all incoming job queues
      */
     public static LinkedList<LinkedList> all_queues = new LinkedList();
@@ -556,6 +588,17 @@ public class Scheduler extends GridSim {
          * all_queues.addLast(queue);
          }
          */
+        all_queues.add(lab_q);
+        all_queues.add(largemem_q);
+        all_queues.add(p100_dev_q);
+        all_queues.add(dev_q);
+        all_queues.add(vis_q);
+        all_queues.add(open_q);
+        all_queues.add(p100_normal_q);
+        all_queues.add(normal_q);
+        
+        
+        
         this.totalGridlet_ = total_gridlet;
         this.current_gl = 0;
 
@@ -1019,7 +1062,7 @@ public class Scheduler extends GridSim {
             // New gridlet arrived
             if (ev.get_tag() == AleaSimTags.GRIDLET_INFO) {
                 ComplexGridlet gl = (ComplexGridlet) ev.get_data();
-                GridletInfo gi = new GridletInfo(gl);
+                GridletInfo gi = new GridletInfo(gl, resourceInfoList);
                 gi.setDue_date(gl.getDue_date()+GridSim.clock());
                 gl.setDue_date(gl.getDue_date()+GridSim.clock());
                 last_job_id = gi.getID();
@@ -1335,8 +1378,10 @@ public class Scheduler extends GridSim {
     public static boolean isSuitable(ResourceInfo ri, GridletInfo gi) {
         if (!ExperimentSetup.failures) {
             HashMap<Integer, Boolean> h = gi.getResourceSuitable();
+            // System.out.println(h);
             boolean suitable = h.get(ri.resource.getResourceID());
             return suitable;
+            //String req_p[] =  
         } else if (!reqs) {
             return ri.canExecuteEver(gi);
         } // non-meta data set use different properties check
@@ -1345,7 +1390,7 @@ public class Scheduler extends GridSim {
             if (ri.getNumRunningPE() >= gi.getNumPE()) {
                 //return true;
                 String req_p = gi.getProperties();
-                String[] props = req_p.split(" ");
+                String[] props = req_p.split(",");
                 for (int i = 0; i < props.length; i++) {
                     if (props[i].equals(ri.resource.getResourceName())) {
                         //System.out.println(gi.getID()+" run on "+ri.resource.getResourceName()+" --> "+req_p);

@@ -5,6 +5,8 @@
         <group>
             <file>file:/D:/PHD/alea-master/CCC/alea-master/Alea/src/xklusac/environment/MachineLoader.java</file>
             <file>file:/D:/PHD/alea-master/CCC/alea-master/Alea/src/xklusac/environment/ExperimentSetup.java</file>
+            <file>file:/D:/PHD/alea-master/CCC/alea-master/Alea/src/xklusac/environment/ResultCollector.java</file>
+            <file>file:/D:/PHD/alea-master/CCC/alea-master/Alea/src/xklusac/environment/SWFLoader.java</file>
             <file>file:/D:/PHD/alea-master/CCC/alea-master/Alea/src/alea/core/WorkloadReaderSWF.java</file>
         </group>
     </open-files>

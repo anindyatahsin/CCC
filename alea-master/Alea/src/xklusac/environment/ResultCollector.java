@@ -58,6 +58,7 @@ public class ResultCollector {
     double week_usage = 0.0;
     int week_count = 0;
     double value = 0;
+    double cost = 0;
     //double run_time = 0.0;
     /**
      * denotes total flow time
@@ -181,7 +182,7 @@ public class ResultCollector {
 
         try {
             out.writeString(user_dir + "/Results(" + problem + ").csv", "1/" + data_set
-                    + ",submit.,compl.,killed,resp_time,runtime,sch-cr-time,makespan,weigh_usg,class_usg,tardiness,wait,sld,awrt,awsd,s_resp,s_wait,s_sld,bounded_sld,backfilled, value," + headersOfPlugins);
+                    + ",submit.,compl.,killed,resp_time,runtime,sch-cr-time,makespan,weigh_usg,class_usg,tardiness,wait,sld,awrt,awsd,s_resp,s_wait,s_sld,bounded_sld,backfilled, value,cost," + headersOfPlugins);
             out.writeString(user_dir + "/WGraphs(" + problem + ").csv", waxis);
             out.writeString(user_dir + "/SGraphs(" + problem + ").csv", saxis);
             out.writeString(user_dir + "/RGraphs(" + problem + ").csv", raxis);
@@ -328,6 +329,7 @@ public class ResultCollector {
                     + Math.round(b_succ_slow * 100.0) / (experiment_count * 100.0) + ","
                     + Math.round(backfilled * 100.0) / (experiment_count * 100.0) + ","
                     + Math.round(value * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(cost * 100.0) / (experiment_count * 100.0) + ","
                     + pluginResultString);
 
         } catch (IOException ex) {
@@ -461,6 +463,7 @@ public class ResultCollector {
         wjob_time += gi.getNumPE() * gridlet_received.getGridletFinishedSoFar();
         flow_time += response;
         value += gi.getNumPE() * gi.getLength() / 3600;
+        
         //interates all plugins and cumulates their value
         for (Plugin pl : plugins) {
             pl.cumulate(gridlet_received);
@@ -495,7 +498,8 @@ public class ResultCollector {
             }
 
             String line = gridlet_received.getGridletID() + "," + Math.round(gi.getRelease_date()) + "," + Math.round(Math.max(0.0, (response - cpu_time)) * 10) / 10.0
-                    + "," + Math.round(cpu_time * 10) / 10.0 + "," + gi.getNumPE() + "," + gi.getRam() + "," + gi.getUser() + "," + gi.getQueue();
+                    + "," + Math.round(cpu_time * 10) / 10.0 + "," + gi.getNumPE() + "," + gi.getRam() + "," + gi.getUser() + "," + gi.getQueue()
+                    + "," + gi.getResourceID();
 
             //out.writeStringWriter(user_dir + "/jobs" + prob + ".csv", line.replace(".", ","));
             //out.writeStringWriter(pw, line.replace(".", ","));
@@ -513,6 +517,7 @@ public class ResultCollector {
                 if (g_tard <= 0.0) {
                     ri.prev_score++;
                 }
+                cost += gi.getNumPE() * gi.getLength() * ri.resource.getCostPerSec();
                 break;
             }
         }

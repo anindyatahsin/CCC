@@ -6,12 +6,14 @@ package xklusac.algorithms.queue_based;
 
 import java.util.Date;
 import gridsim.GridSim;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import xklusac.algorithms.SchedulingPolicy;
 import xklusac.environment.GridletInfo;
 import xklusac.environment.ResourceInfo;
 import xklusac.environment.Scheduler;
+import xklusac.extensions.CostComparator;
 import xklusac.extensions.WallclockComparator;
 
 /**
@@ -107,44 +109,44 @@ public class PBS_PRO implements SchedulingPolicy {
             // All remaining non standard queues are considered to be normal
             Scheduler.q3.addLast(gi);
         } else {
-            if (gi.getQueue().equals("short")) {
-                Scheduler.short_queue.addLast(gi);
+            if (gi.getQueue().equals("normal_q")) {
+                Scheduler.normal_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
-            if (gi.getQueue().equals("normal")) {
-                Scheduler.normal_queue.addLast(gi);
+            if (gi.getQueue().equals("dev_q")) {
+                Scheduler.dev_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
-            if (gi.getQueue().equals("quark")) {
-                Scheduler.quark_queue.addLast(gi);
+            if (gi.getQueue().equals("vis_q")) {
+                Scheduler.vis_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
-            if (gi.getQueue().equals("long")) {
-                Scheduler.long_queue.addLast(gi);
+            if (gi.getQueue().equals("largemem_q")) {
+                Scheduler.largemem_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
-            if (gi.getQueue().equals("ncbr")) {
-                Scheduler.ncbr_queue.addLast(gi);
+            if (gi.getQueue().equals("p100_dev_q")) {
+                Scheduler.p100_dev_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
-            if (gi.getQueue().equals("iti")) {
-                Scheduler.iti_queue.addLast(gi);
+            if (gi.getQueue().equals("p100_normal_q")) {
+                Scheduler.p100_normal_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
-            if (gi.getQueue().equals("cpmd")) {
-                Scheduler.cpmd_queue.addLast(gi);
+            if (gi.getQueue().equals("open_q")) {
+                Scheduler.open_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
 
             // All remaining non standard queues are considered to be normal
-            Scheduler.normal_queue.addLast(gi);
+            Scheduler.lab_q.addLast(gi);
         }
         Scheduler.runtime += (new Date().getTime() - runtime1);
 
@@ -181,7 +183,8 @@ public class PBS_PRO implements SchedulingPolicy {
             for (int i = 0; i < Scheduler.queue.size(); i++) {
                 
                 GridletInfo gi = (GridletInfo) Scheduler.queue.get(i);
-                
+                ArrayList<ResourceInfo> rsInfoList = Scheduler.resourceInfoList;
+                //Collections.sort(rsInfoList, new CostComparator());
                 for (int j = 0; j < Scheduler.resourceInfoList.size(); j++) {
                     ResourceInfo ri = (ResourceInfo) Scheduler.resourceInfoList.get(j);
                     if (Scheduler.isSuitable(ri, gi) && ri.canExecuteNow(gi)) {
@@ -211,7 +214,7 @@ public class PBS_PRO implements SchedulingPolicy {
                     // we have to decrease the counter otherwise we would skip a job due to i++ in for loop
                     i--;
                     r_cand = null;
-                    System.out.println(gi.getID()+" send job by PBS PRO..."+Math.round(GridSim.clock()));
+                    //System.out.println(gi.getID()+" send job by PBS PRO..."+Math.round(GridSim.clock()));
                     return scheduled;
 
                 }

@@ -1,6 +1,7 @@
 package xklusac.environment;
 
 import gridsim.GridSim;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 //import gridsim.*;
@@ -126,6 +127,41 @@ public class GridletInfo {
      * @param gl - Gridlet - the constructor gets the important informations
      * about gridlet and sets them to inner variables
      */
+    public GridletInfo(ComplexGridlet gl, ArrayList<ResourceInfo> rsInfo) {
+
+        this.setOwnerID(gl.getUserID());
+        this.setID(gl.getGridletID());
+        this.setResourceID(gl.getResourceID());
+        this.setStatus(gl.getGridletStatus());
+        this.setLength(gl.getGridletLength());
+        this.setFinishedSoFar(gl.getGridletFinishedSoFar());
+        this.setCompletitionFactor(gl.getGridletFinishedSoFar() / gl.getGridletLength());
+        this.setGridlet(gl);
+        this.setOsRequired(gl.getOpSystemRequired());
+        this.setArchRequired(gl.getArchRequired());
+        this.setRelease_date(gl.getRelease_date());
+        this.setDue_date(gl.getDue_date());
+        this.setTardiness(0.0);
+        this.setTime_to_release(0.0);
+        this.setPriority(gl.getPriority());
+        this.setNumPE(gl.getNumPE());
+        this.setExpectedFinishTime(GridSim.clock() + gl.getJobLimit());
+        this.setEstimatedLength(gl.getEstimatedLength());
+        this.setEstimatedMachine(gl.getEstimatedMachine());
+        this.setQueue(gl.getQueue());
+        this.setExpectedStartTime(GridSim.clock() + 0.0);
+        this.setProperties(gl.getProperties());
+        this.setUser(gl.getUser());
+        this.setAvg_length(0.0);
+        this.setJobLimit(gl.getJobLimit());
+        this.setPercentage(gl.getPercentage());
+        this.setInit(true);
+        this.setRam(gl.getRam());
+        this.setNumNodes(gl.getNumNodes());
+        this.setPpn(gl.getPpn());
+        this.setResourceSuitable(rsInfo);
+    }
+    
     public GridletInfo(ComplexGridlet gl) {
 
         this.setOwnerID(gl.getUserID());
@@ -646,5 +682,31 @@ public class GridletInfo {
      */
     public void setResourceSuitable(HashMap resourceSuitable) {
         this.resourceSuitable = resourceSuitable;
+    }
+    
+    /**
+     * @param rsInfo list of all the available resources to check if the resource is suitable
+     */
+    public void setResourceSuitable(ArrayList<ResourceInfo> rsInfo) {
+        //this.resourceSuitable = resourceSuitable;
+        resourceSuitable = new HashMap<>();
+        for(int i = 0; i < rsInfo.size(); i++){
+            ResourceInfo ri = rsInfo.get(i);
+            String[] ri_p = ri.resource.getProperties().split(",");
+            String[] gi_p = getGridlet().getProperties().split(",");
+            int j = 0, k = 0;
+            boolean match = true;
+            for(j = 0; j < gi_p.length; j++){
+                for(k = 0; k < ri_p.length; k++){
+                    if(gi_p[j].equals(ri_p[k])) break;
+                }
+                if(k == ri_p.length){ 
+                    match = false;
+                    break;
+                }
+            }
+            resourceSuitable.put(ri.resource.getResourceID(), match);
+        }
+        
     }
 }
