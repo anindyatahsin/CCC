@@ -462,7 +462,24 @@ public class ResultCollector {
         job_time += gi.getNumPE() * cpu_time;
         wjob_time += gi.getNumPE() * gridlet_received.getGridletFinishedSoFar();
         flow_time += response;
-        value += gi.getNumPE() * gi.getLength() / 3600;
+        String queue = gi.getQueue();
+        if(!queue.contains("normal")){
+            if(finish_time > gridlet_received.getDue_date()){
+                value = 0;
+            }
+            else{
+                if(queue.contains("dev") || queue.contains("vis") || queue.contains("open")){
+                    value += 2 * gi.getNumPE() * gi.getLength() / 3600;
+                }
+                else{
+                    value += 4 * gi.getNumPE() * gi.getLength() / 3600;
+                }
+            }
+        }
+        else{
+            value += gi.getNumPE() * gi.getLength() / 3600;
+        }
+        
         
         //interates all plugins and cumulates their value
         for (Plugin pl : plugins) {

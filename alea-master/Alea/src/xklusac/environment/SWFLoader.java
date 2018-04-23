@@ -367,6 +367,7 @@ public class SWFLoader extends GridSim {
             numNodes = s.length;
             System.out.println("Job " + id + " requested node " + s[0] + " and length " + numNodes);
         }
+        double deadline = job_limit * 2;
         ppn = Integer.parseInt(values[17]); 
         if (values.length > 19) {
             if(!values[19].equals("-1")){
@@ -377,6 +378,8 @@ public class SWFLoader extends GridSim {
             }
             else if(queue.contains("normal") || queue.contains("dev") || queue.contains("vis") || queue.contains("open")){
                 properties += queue;
+            }else{
+                deadline = Math.min(job_limit * 2, job_limit + 30 *60);
             }
                
 
@@ -485,7 +488,7 @@ public class SWFLoader extends GridSim {
         }
 
         // manually established - fix it according to your needs
-        double deadline = job_limit * 2;
+        
         //System.out.println("creating job:" + id + " " + user + " " + job_limit + " " + new Double(length) + " " + estimatedLength + " " + 10 + " " + 10 + " " +
         //        "Linux" + " " + "Risc arch." + " " + arrival + " " + deadline + " " + 1 + " " + numCPU + " " + 0.0 + " " + queue + " " + properties + " " + perc + " " + ram + " " + numNodes + " " + ppn);
         

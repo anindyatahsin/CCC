@@ -184,7 +184,7 @@ public class PBS_PRO implements SchedulingPolicy {
                 
                 GridletInfo gi = (GridletInfo) Scheduler.queue.get(i);
                 ArrayList<ResourceInfo> rsInfoList = Scheduler.resourceInfoList;
-                //Collections.sort(rsInfoList, new CostComparator());
+                Collections.sort(rsInfoList, new CostComparator());
                 for (int j = 0; j < Scheduler.resourceInfoList.size(); j++) {
                     ResourceInfo ri = (ResourceInfo) Scheduler.resourceInfoList.get(j);
                     if (Scheduler.isSuitable(ri, gi) && ri.canExecuteNow(gi)) {
