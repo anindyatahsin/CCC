@@ -599,7 +599,7 @@ public class ResultCollector {
         // classic machine usage
         results.add(usage / 100.0);
 
-        //wait time plugin at the end of the method
+        //wait time plugin at the end Of the method
         wait_time_global = Math.round((wait_time_global / received) * 100) / 100.0;
         results.add(wait_time_global);
 
