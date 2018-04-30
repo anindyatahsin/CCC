@@ -118,6 +118,15 @@ public class GridletInfo {
     private long ram;
     private int numNodes;
     private int ppn;
+    private String inst;
+
+    public String getInst() {
+        return inst;
+    }
+
+    public void setInst(String isnt) {
+        this.inst = inst;
+    }
 
     private HashMap<Integer, Boolean> resourceSuitable;
 
@@ -160,6 +169,7 @@ public class GridletInfo {
         this.setNumNodes(gl.getNumNodes());
         this.setPpn(gl.getPpn());
         this.setResourceSuitable(rsInfo);
+        this.setInst(gl.getInst());
     }
     
     public GridletInfo(ComplexGridlet gl) {
@@ -195,6 +205,7 @@ public class GridletInfo {
         this.setNumNodes(gl.getNumNodes());
         this.setPpn(gl.getPpn());
         this.setResourceSuitable(new HashMap());
+        this.setInst(gl.getInst());
     }
 
     /**

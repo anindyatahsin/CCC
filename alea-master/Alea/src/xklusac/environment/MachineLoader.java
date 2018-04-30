@@ -96,7 +96,7 @@ public class MachineLoader {
             int totalMachine = Integer.parseInt(values[2]);
             int totalPE = Integer.parseInt(values[3]);
             int peRating = Integer.parseInt(values[4]);
-            cost = Integer.parseInt(values[6])/3600.0;
+            cost = Double.parseDouble(values[6])/3600.0;
             String name = values[1];
 
             // for JobLoader's purposes
@@ -144,13 +144,18 @@ public class MachineLoader {
 
             double time_zone = 0.0;         // time zone this resource located
 
-            String properties = values[7];
+            String properties = "";
+            
+            String institute = values[7];
+            if(values.length > 8){
+                properties = values[8];
+            }
 
             //name = name;
             name_id++;
 
             ComplexResourceCharacteristics resConfig = new ComplexResourceCharacteristics(
-                    arch, os, mList, ResourceCharacteristics.SPACE_SHARED, time_zone, cost, ram, properties, cpu_ids);
+                    arch, os, mList, ResourceCharacteristics.SPACE_SHARED, time_zone, cost, ram, properties, cpu_ids, institute);
 
 
 
@@ -353,7 +358,7 @@ public class MachineLoader {
             ExperimentSetup.machineNames.addLast(mach_names);
             names.clear();
             ComplexResourceCharacteristics resConfig = new ComplexResourceCharacteristics(
-                    arch, os, mList, ResourceCharacteristics.SPACE_SHARED, time_zone, cost, ram, properties, cpu_ids);
+                    arch, os, mList, ResourceCharacteristics.SPACE_SHARED, time_zone, cost, ram, properties, cpu_ids, "");
 
             // 6. Finally, we need to create a ComplexGridResource object.
             long seed = 11L * 13 * 17 * 19 * 23 + 1;
@@ -475,7 +480,7 @@ public class MachineLoader {
             double time_zone = 0.0;         // time zone this resource located
 
             ComplexResourceCharacteristics resConfig = new ComplexResourceCharacteristics(
-                    arch, os, mList, ResourceCharacteristics.SPACE_SHARED, time_zone, cost, 1024000, "", "");
+                    arch, os, mList, ResourceCharacteristics.SPACE_SHARED, time_zone, cost, 1024000, "", "", "");
             AllocPolicy apolicy = null;
 
             try {

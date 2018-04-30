@@ -9,6 +9,7 @@ import gridsim.GridSim;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
+import javax.swing.text.html.HTML;
 import xklusac.algorithms.SchedulingPolicy;
 import xklusac.environment.GridletInfo;
 import xklusac.environment.ResourceInfo;
@@ -108,7 +109,7 @@ public class PBS_PRO implements SchedulingPolicy {
             }
             // All remaining non standard queues are considered to be normal
             Scheduler.q3.addLast(gi);
-        } else {
+        } else if(Scheduler.data_set.contains("vtech")) {
             if (gi.getQueue().equals("normal_q")) {
                 Scheduler.normal_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
@@ -148,6 +149,81 @@ public class PBS_PRO implements SchedulingPolicy {
             // All remaining non standard queues are considered to be normal
             Scheduler.lab_q.addLast(gi);
         }
+        else if(Scheduler.data_set.contains("uva")) {
+            if (gi.getQueue().equals("normal")) {
+                Scheduler.normal.addLast(gi);
+                Scheduler.runtime += (new Date().getTime() - runtime1);
+                return;
+            }
+            if (gi.getQueue().equals("dev")) {
+                Scheduler.dev.addLast(gi);
+                Scheduler.runtime += (new Date().getTime() - runtime1);
+                return;
+            }
+            if (gi.getQueue().equals("standard")) {
+                Scheduler.standard.addLast(gi);
+                Scheduler.runtime += (new Date().getTime() - runtime1);
+                return;
+            }
+            if (gi.getQueue().equals("largemem")) {
+                Scheduler.largemem.addLast(gi);
+                Scheduler.runtime += (new Date().getTime() - runtime1);
+                return;
+            }
+            if (gi.getQueue().equals("gpu")) {
+                Scheduler.gpu.addLast(gi);
+                Scheduler.runtime += (new Date().getTime() - runtime1);
+                return;
+            }
+            if (gi.getQueue().equals("parallel")) {
+                Scheduler.parallel.addLast(gi);
+                Scheduler.runtime += (new Date().getTime() - runtime1);
+                return;
+            }
+
+            // All remaining non standard queues are considered to be normal
+            Scheduler.lab_q.addLast(gi);
+        }
+        
+        else if(Scheduler.data_set.contains("iu")) {
+            if (gi.getQueue().equals("normal")) {
+                Scheduler.normal.addLast(gi);
+                Scheduler.runtime += (new Date().getTime() - runtime1);
+                return;
+            }
+            if (gi.getQueue().equals("debug_gpu")) {
+                Scheduler.debug_cpu.addLast(gi);
+                Scheduler.runtime += (new Date().getTime() - runtime1);
+                return;
+            }
+            if (gi.getQueue().equals("debug_cpu")) {
+                Scheduler.debug_gpu.addLast(gi);
+                Scheduler.runtime += (new Date().getTime() - runtime1);
+                return;
+            }
+            if (gi.getQueue().equals("cpu16")) {
+                Scheduler.cpu.addLast(gi);
+                Scheduler.runtime += (new Date().getTime() - runtime1);
+                return;
+            }
+            if (gi.getQueue().equals("gpu")) {
+                Scheduler.gpu.addLast(gi);
+                Scheduler.runtime += (new Date().getTime() - runtime1);
+                return;
+            }
+            if (gi.getQueue().equals("long")) {
+                Scheduler.longq.addLast(gi);
+                Scheduler.runtime += (new Date().getTime() - runtime1);
+                return;
+            }
+            if (gi.getQueue().equals("serial")) {
+                Scheduler.serial.addLast(gi);
+                Scheduler.runtime += (new Date().getTime() - runtime1);
+                return;
+            }
+            // All remaining non standard queues are considered to be normal
+            Scheduler.lab_q.addLast(gi);
+        }
         Scheduler.runtime += (new Date().getTime() - runtime1);
 
     }
@@ -184,7 +260,7 @@ public class PBS_PRO implements SchedulingPolicy {
                 
                 GridletInfo gi = (GridletInfo) Scheduler.queue.get(i);
                 ArrayList<ResourceInfo> rsInfoList = Scheduler.resourceInfoList;
-                Collections.sort(rsInfoList, new CostComparator());
+                Collections.sort(rsInfoList, new CostComparator(gi.getInst()));
                 for (int j = 0; j < Scheduler.resourceInfoList.size(); j++) {
                     ResourceInfo ri = (ResourceInfo) Scheduler.resourceInfoList.get(j);
                     if (Scheduler.isSuitable(ri, gi) && ri.canExecuteNow(gi)) {

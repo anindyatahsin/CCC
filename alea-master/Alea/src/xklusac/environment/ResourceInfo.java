@@ -132,6 +132,15 @@ public class ResourceInfo {
     double[] r_tuwt;
     double[] r_tusa;
     public MachineList virt_machines;
+    String Institute;
+
+    public String getInstitute() {
+        return Institute;
+    }
+
+    public void setInstitute(String Institute) {
+        this.Institute = Institute;
+    }
 
     public int nowFreePE = 0;
 
@@ -150,6 +159,7 @@ public class ResourceInfo {
         this.peRating = resource.getMIPSRatingOfOnePE();
         this.stable_w = false;
         this.stable_s = false;
+        this.setInstitute(resource.getInstitute());
         if (ExperimentSetup.use_RAM) {
             AdvancedSpaceSharedWithRAM policy = null;
             for (int i = 0; i < ExperimentSetup.local_schedulers.size(); i++) {

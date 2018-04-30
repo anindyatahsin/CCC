@@ -41,20 +41,32 @@ public class ComplexResourceCharacteristics extends ResourceCharacteristics {
      * not used in Alea 2.0
      */
     private boolean failed;
+    
+    private String Institute;
 
     /**
      * Creates a new instance of ComplexResourceCharacteristics
      */
     public ComplexResourceCharacteristics(String architecture, String OS,
             MachineList machineList, int allocationPolicy, double timeZone,
-            double costPerSec, long ram, String properties, String cpu_ids) {
+            double costPerSec, long ram, String properties, String cpu_ids, String inst) {
         super(architecture, OS, machineList, allocationPolicy, timeZone, costPerSec);
         this.setRamOnOneMachine(ram);
         this.setProperties(properties);
         this.setFailed(false);
+        this.setInstitute(inst);
         //this.setCpu_ids_string(cpu_ids);
     }
 
+    public String getInstitute() {
+        return Institute;
+    }
+
+    public void setInstitute(String Institute) {
+        this.Institute = Institute;
+    }
+    
+    
     public long getRamOnOneMachine() {
         return ramOnOneMachine;
     }

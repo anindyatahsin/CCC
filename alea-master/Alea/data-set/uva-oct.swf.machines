@@ -1,0 +1,4 @@
+0	parallel0	240	20	1	134217728	2	uva
+1	largemem	5	16	1	1073741824	3	uva	largemem
+2	gpu	14	28	1	268435456	5	uva	gpu	
+3	knl	8	64	1	205520896	3	uva	knl

@@ -67,6 +67,15 @@ public class ComplexGridlet extends Gridlet {
     private String onJobStart = null;
     private String onJobCompl = null;
     private String onJobFail = null;
+    private String inst;
+
+    public String getInst() {
+        return inst;
+    }
+
+    public void setInst(String inst) {
+        this.inst = inst;
+    }
 
     public String getOnJobStart() {
         return onJobStart;
@@ -111,7 +120,7 @@ public class ComplexGridlet extends Gridlet {
      */
     public ComplexGridlet(int gridletID, String user, long job_limit, double gridletLength, double estimatedLength, long gridletFileSize,
             long gridletOutputSize, String oSrequired, String archRequired,
-            double arrival_time, double due_date, int priority, int numPE, double estMach, String queue, String properties, double percentage, long ram, int numNodes, int ppn) {
+            double arrival_time, double due_date, int priority, int numPE, double estMach, String queue, String properties, double percentage, long ram, int numNodes, int ppn, String institute) {
         // call Gridlet constructor
         super(gridletID, gridletLength, gridletFileSize, gridletOutputSize);
         this.setOpSystemRequired(oSrequired);
@@ -133,6 +142,7 @@ public class ComplexGridlet extends Gridlet {
         this.setRam(ram);
         this.setPpn(ppn);
         this.setNumNodes(numNodes);
+        this.setInst(institute);
     }
 
     /**

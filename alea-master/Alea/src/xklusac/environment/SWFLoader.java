@@ -276,7 +276,13 @@ public class SWFLoader extends GridSim {
         String queue = values[14];
 
         // requested RAM = KB per node (not CPU)
-        long ram = Long.parseLong(values[9]);
+        long ram = -1;
+        try{
+            ram = Long.parseLong(values[9]);
+        }catch(NumberFormatException e){
+            ram = (long)(Double.parseDouble(values[9]) * 1000);
+        }
+        
         if (ram == -1) {
             if (Long.parseLong(values[9]) == -1) {
                 //System.out.println(id + " not specified RAM, setting 1 KB...");
@@ -368,18 +374,43 @@ public class SWFLoader extends GridSim {
             System.out.println("Job " + id + " requested node " + s[0] + " and length " + numNodes);
         }
         double deadline = job_limit * 2;
-        ppn = Integer.parseInt(values[17]); 
+        try{
+            ppn = Integer.parseInt(values[17]);
+        }catch(NumberFormatException e){
+            System.out.println(id);
+            e.printStackTrace();
+        } 
+        String institute = values[18];
+        //System.out.println(institute);
         if (values.length > 19) {
             if(!values[19].equals("-1")){
                 properties = values[19].split("=")[0];
-                if(queue.contains("normal") || queue.contains("dev") || queue.contains("vis") || queue.contains("open")){
-                    properties += "," + queue;
+                if(data_set.contains("vtech")){
+                    if(queue.contains("normal") || queue.contains("dev") || queue.contains("vis") || queue.contains("open")){
+                        properties += "," + queue;
+                    }
+                }
+                if(data_set.contains("uva")){
+                    if(queue.contains("largemem") || queue.contains("knl") || queue.contains("gpu")){
+                        properties += "," + queue;
+                    }
                 }
             }
-            else if(queue.contains("normal") || queue.contains("dev") || queue.contains("vis") || queue.contains("open")){
-                properties += queue;
-            }else{
-                deadline = Math.min(job_limit * 2, job_limit + 30 *60);
+            else if(data_set.contains("vtech")){ 
+                if(queue.contains("normal") || queue.contains("dev") || queue.contains("vis") || queue.contains("open")){
+                    properties += queue;
+                }
+                else{
+                    deadline = Math.min(job_limit * 2, job_limit + 30 *60);
+                }
+            }
+            else if(data_set.contains("uva")){
+                if(queue.contains("largemem") || queue.contains("knl") || queue.contains("gpu")){
+                    properties += "," + queue;
+                }
+                else if(!(queue.contains("standard") || queue.contains("dev"))){
+                    deadline = Math.min(job_limit * 2, job_limit + 30 *60);
+                }
             }
                
 
@@ -444,7 +475,7 @@ public class SWFLoader extends GridSim {
                 }
             }
 
-            if (ppn * numNodes != numCPU) {
+            if (numCPU / numNodes != ppn) {
                 System.out.println(id + ": CPUs mismatch CPUs = " + numCPU + " ppn = " + ppn + " nodes = " + numNodes);
                 numCPU = ppn * numNodes;
             }
@@ -493,7 +524,7 @@ public class SWFLoader extends GridSim {
         //        "Linux" + " " + "Risc arch." + " " + arrival + " " + deadline + " " + 1 + " " + numCPU + " " + 0.0 + " " + queue + " " + properties + " " + perc + " " + ram + " " + numNodes + " " + ppn);
         
         ComplexGridlet gl = new ComplexGridlet(id, user, job_limit, new Double(length), estimatedLength, 10, 10,
-                "Linux", "Risc arch.", arrival, deadline, 1, numCPU, 0.0, queue, properties, perc, ram, numNodes, ppn);
+                "Linux", "Risc arch.", arrival, deadline, 1, numCPU, 0.0, queue, properties, perc, ram, numNodes, ppn, institute);
 
         // and set user id to the Scheduler entity - otherwise it would be returned to the JobLoader when completed.
         //System.out.println(id+" job has limit = "+(job_limit/3600.0)+" queue = "+queue);

@@ -87,6 +87,18 @@ public class ResultCollector {
     /**
      * auxiliary variable
      */
+    private int hpJobs = 0;
+    /**
+     * auxiliary variable
+     */
+    private int mpJobs = 0;
+    /**
+     * auxiliary variable
+     */
+    private int lpJobs = 0;
+    /**
+     * auxiliary variable
+     */
     private int failed;
     /**
      * auxiliary variable
@@ -182,7 +194,7 @@ public class ResultCollector {
 
         try {
             out.writeString(user_dir + "/Results(" + problem + ").csv", "1/" + data_set
-                    + ",submit.,compl.,killed,resp_time,runtime,sch-cr-time,makespan,weigh_usg,class_usg,tardiness,wait,sld,awrt,awsd,s_resp,s_wait,s_sld,bounded_sld,backfilled, value,cost," + headersOfPlugins);
+                    + ",submit.,compl.,killed,resp_time,runtime,sch-cr-time,makespan,weigh_usg,class_usg,tardiness,wait,sld,awrt,awsd,s_resp,s_wait,s_sld,bounded_sld,backfilled, value,cost,hpJobs,mpJobs,lpJobs" + headersOfPlugins);
             out.writeString(user_dir + "/WGraphs(" + problem + ").csv", waxis);
             out.writeString(user_dir + "/SGraphs(" + problem + ").csv", saxis);
             out.writeString(user_dir + "/RGraphs(" + problem + ").csv", raxis);
@@ -330,6 +342,9 @@ public class ResultCollector {
                     + Math.round(backfilled * 100.0) / (experiment_count * 100.0) + ","
                     + Math.round(value * 100.0) / (experiment_count * 100.0) + ","
                     + Math.round(cost * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(hpJobs * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(mpJobs * 100.0) / (experiment_count * 100.0) + ","
+                    + Math.round(lpJobs * 100.0) / (experiment_count * 100.0) + ","
                     + pluginResultString);
 
         } catch (IOException ex) {
@@ -463,24 +478,43 @@ public class ResultCollector {
         wjob_time += gi.getNumPE() * gridlet_received.getGridletFinishedSoFar();
         flow_time += response;
         String queue = gi.getQueue();
+        double jobValue = 0;
         if(!queue.contains("normal")){
             if(finish_time > gridlet_received.getDue_date()){
-                value = 0;
+                jobValue = 0;
             }
             else{
                 if(queue.contains("dev") || queue.contains("vis") || queue.contains("open")){
-                    value += 2 * gi.getNumPE() * gi.getLength() / 3600;
+                    jobValue = 2 * gi.getNumPE() * gi.getLength() / 3600;
+                    mpJobs++;
                 }
                 else{
-                    value += 4 * gi.getNumPE() * gi.getLength() / 3600;
+                    jobValue = 4 * gi.getNumPE() * gi.getLength() / 3600;
+                    hpJobs++;
                 }
             }
         }
         else{
-            value += gi.getNumPE() * gi.getLength() / 3600;
+            lpJobs++;
+            jobValue = gi.getNumPE() * gi.getLength() / 3600;
+        }
+        String properties = gi.getProperties();
+        if(properties.contains("gpu") || properties.contains("vis_q")){
+            jobValue = jobValue * 5;
+        }
+        if(properties.contains("largemem")){
+            jobValue = jobValue * 3;
+        }
+        if(properties.contains("mic")){
+            jobValue = jobValue * 2;
+        }
+        if(properties.contains("highmem")){
+            jobValue = jobValue * 2;
         }
         
         
+        
+       
         //interates all plugins and cumulates their value
         for (Plugin pl : plugins) {
             pl.cumulate(gridlet_received);
@@ -535,10 +569,13 @@ public class ResultCollector {
                     ri.prev_score++;
                 }
                 cost += gi.getNumPE() * gi.getLength() * ri.resource.getCostPerSec();
+                if(gi.getNumNodes() > 1){
+                    jobValue = Math.min(gi.getNumPE() * gi.getLength() * ri.resource.getCostPerSec(), jobValue * 2);
+                }
                 break;
             }
         }
-
+        value += jobValue;
     }
 
     /**

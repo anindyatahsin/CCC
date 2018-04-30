@@ -172,6 +172,55 @@ public class Scheduler extends GridSim {
     */
     public static LinkedList p100_dev_q = new LinkedList();
     /**
+     * incoming job queue
+    */
+    public static LinkedList normal = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList dev = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList parallel = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList gpu = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList knl = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList largemem = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList debug_cpu = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList debug_gpu = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList cpu = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList longq = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList serial = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList standard = new LinkedList();
+    
+    /**
      * List of all incoming job queues
      */
     public static LinkedList<LinkedList> all_queues = new LinkedList();
@@ -588,14 +637,34 @@ public class Scheduler extends GridSim {
          * all_queues.addLast(queue);
          }
          */
-        all_queues.add(lab_q);
-        all_queues.add(largemem_q);
-        all_queues.add(p100_dev_q);
-        all_queues.add(dev_q);
-        all_queues.add(vis_q);
-        all_queues.add(open_q);
-        all_queues.add(p100_normal_q);
-        all_queues.add(normal_q);
+        if(data_set.contains("vtech")){
+            all_queues.add(lab_q);
+            all_queues.add(p100_dev_q);
+            all_queues.add(dev_q);
+            all_queues.add(largemem_q);
+            all_queues.add(vis_q);
+            all_queues.add(open_q);
+            all_queues.add(p100_normal_q);
+            all_queues.add(normal_q);
+        }
+        if(data_set.contains("uva")){
+            all_queues.add(lab_q);
+            all_queues.add(dev);
+            all_queues.add(largemem);
+            all_queues.add(gpu);
+            all_queues.add(knl);
+            all_queues.add(parallel);
+            all_queues.add(standard);
+        }
+        if(data_set.contains("iu")){
+            all_queues.add(debug_gpu);
+            all_queues.add(debug_cpu);
+            all_queues.add(gpu);
+            all_queues.add(longq);
+            all_queues.add(cpu);
+            all_queues.add(normal);
+            all_queues.add(serial);
+        }
         
         
         
