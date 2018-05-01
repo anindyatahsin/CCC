@@ -1,2 +1,2 @@
-0	bigred2	344	32	1	67108864	2
-1	bigred2-gpu	676	16	1	33554432	5	gpu
+0	bigred2	344	32	1	67108864	2	iu
+1	bigred2-gpu	676	16	1	33554432	5	iu	gpu

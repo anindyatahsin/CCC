@@ -221,6 +221,19 @@ public class Scheduler extends GridSim {
     public static LinkedList standard = new LinkedList();
     
     /**
+     * incoming job queue
+    */
+    public static LinkedList regular_q = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList high_q = new LinkedList();
+    /**
+     * incoming job queue
+    */
+    public static LinkedList low_q = new LinkedList();
+    
+    /**
      * List of all incoming job queues
      */
     public static LinkedList<LinkedList> all_queues = new LinkedList();
@@ -616,6 +629,7 @@ public class Scheduler extends GridSim {
         this.data_set = data_set;
         this.suff = suff;
         this.repeated = false;
+        
 
         // add all PBS queues into the queue list
         /*
@@ -638,25 +652,25 @@ public class Scheduler extends GridSim {
          }
          */
         if(data_set.contains("vtech")){
-            all_queues.add(lab_q);
-            all_queues.add(p100_dev_q);
-            all_queues.add(dev_q);
-            all_queues.add(largemem_q);
-            all_queues.add(vis_q);
-            all_queues.add(open_q);
-            all_queues.add(p100_normal_q);
-            all_queues.add(normal_q);
+            all_queues.add(lab_q); //high
+            all_queues.add(p100_dev_q); //med
+            all_queues.add(dev_q); //med
+            all_queues.add(largemem_q); //med
+            all_queues.add(vis_q); //med
+            all_queues.add(p100_normal_q); //low
+            all_queues.add(normal_q); //low
+            all_queues.add(open_q);  //low
         }
-        if(data_set.contains("uva")){
-            all_queues.add(lab_q);
-            all_queues.add(dev);
-            all_queues.add(largemem);
-            all_queues.add(gpu);
-            all_queues.add(knl);
-            all_queues.add(parallel);
-            all_queues.add(standard);
+        else if(data_set.contains("uva")){
+            all_queues.add(lab_q); // high
+            all_queues.add(dev); //high
+            all_queues.add(largemem); // med
+            all_queues.add(gpu); // med
+            all_queues.add(knl); //med
+            all_queues.add(parallel); // low
+            all_queues.add(standard); // low
         }
-        if(data_set.contains("iu")){
+        else if(data_set.contains("iu")){
             all_queues.add(debug_gpu);
             all_queues.add(debug_cpu);
             all_queues.add(gpu);
@@ -664,6 +678,11 @@ public class Scheduler extends GridSim {
             all_queues.add(cpu);
             all_queues.add(normal);
             all_queues.add(serial);
+        }
+        else if(data_set.contains("ccc")){
+            all_queues.add(regular_q);
+            all_queues.add(high_q);
+            all_queues.add(low_q);
         }
         
         
@@ -782,7 +801,8 @@ public class Scheduler extends GridSim {
                     ResourceInfo ri = (ResourceInfo) resourceInfoList.get(i);
                     total_machines += ri.resource.getNumMachines();
                     System.out.println("id = " + ri.resource.getResourceID() + ", name = " + ri.resource.getResourceName() + ", CPUs = " + ri.resource.getNumPE() + ", CPU rating = "
-                            + ri.resource.getMIPSRatingOfOnePE() + ", machines = " + ri.resource.getNumMachines() + ", props=" + ri.resource.getProperties() + ", RAM=" + (ri.resource.getRamOnOneMachine() / 1024.0) + " MB");
+                            + ri.resource.getMIPSRatingOfOnePE() + ", machines = " + ri.resource.getNumMachines() + ", props=" + ri.resource.getProperties() + ", RAM=" 
+                            + (ri.resource.getRamOnOneMachine() / (1024.0 * 1024.0)) + " GB, cost=" + ri.resource.getCostPerSec() + ", inst " + ri.resource.getInstitute());
                 }
                 System.out.println("Total available MIPS power = " + availPEs + " MIPS in " + classic_availPEs + " CPUs and machines = " + total_machines);
                 System.out.println("=======================================================================================================");
@@ -821,7 +841,7 @@ public class Scheduler extends GridSim {
         }
         super.sim_schedule(this.getEntityId(this.getEntityName()), fairdelay, AleaSimTags.FAIRSHARE_UPDATE);
         super.sim_schedule(this.getEntityId(this.getEntityName()), fairdelay + 2, AleaSimTags.SCHEDULER_PRINT_FIRST_JOB_IN_QUEUE);
-
+        //System.out.printerr("Simulation start time");
         // Accept events until the simulation is finished
         while (!end_of_submission || received < in_job_counter) {
 

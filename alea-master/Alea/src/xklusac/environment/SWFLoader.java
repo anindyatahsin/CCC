@@ -176,7 +176,10 @@ public class SWFLoader extends GridSim {
                     for (int s = 0; s < ExperimentSetup.skipJob; s++) {
                         line = br.readLine();
                     }
-                    values = line.split("\t");
+                    if(!data_set.contains("ccc"))
+                        values = line.split("\t");
+                    else 
+                        values = line.split(",");
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -193,7 +196,10 @@ public class SWFLoader extends GridSim {
                     if (line.charAt(0) == ' ') {
                         line = line.substring(1);
                     }*/
-                    values = line.split("\\s+");
+                    if(!data_set.contains("ccc"))
+                        values = line.split("\\s+");
+                    else
+                        values = line.split(",");
                     break;
                 } else {
                     //System.out.println("error --- "+values[0]);
@@ -216,7 +222,10 @@ public class SWFLoader extends GridSim {
                     line = line.substring(1);
                 }*/
                 //System.out.println("error1 = "+line+" at gi = "+j);
-                values = line.split("\\s+");
+                if(!data_set.contains("ccc"))
+                    values = line.split("\\s+");
+                else
+                    values = line.split(",");
 
             } catch (IOException ex) {
                 System.out.println("error = " + values[0] + " at gi = " + j);
@@ -382,102 +391,236 @@ public class SWFLoader extends GridSim {
         } 
         String institute = values[18];
         //System.out.println(institute);
-        if (values.length > 19) {
-            if(!values[19].equals("-1")){
-                properties = values[19].split("=")[0];
-                if(data_set.contains("vtech")){
-                    if(queue.contains("normal") || queue.contains("dev") || queue.contains("vis") || queue.contains("open")){
-                        properties += "," + queue;
+        if(!data_set.contains("ccc")){
+            if (values.length > 19) {
+                if(!values[19].equals("-1")){
+                    properties = values[19].split("=")[0];
+                    if(data_set.contains("vtech")){
+                        if(queue.contains("normal") || queue.contains("largemem") || queue.contains("vis") || queue.contains("open")){
+                            properties += "," + queue;
+                        }
+                        else{
+                            deadline = Math.min(job_limit * 2, length + 30 * 60);
+                        }
+                    }
+                    if(data_set.contains("uva")){
+                        if(queue.contains("largemem") || queue.contains("knl") || queue.contains("gpu")){
+                            properties += "," + queue;
+                        }
+                        else{
+                            deadline = Math.min(job_limit * 2, length + 30 * 60);
+                        }
+                    }
+                    else if(data_set.contains("iu")){
+                        if(queue.contains("debug")){
+                            deadline = Math.min(job_limit * 2, length + 30 * 60);
+                        }
+                        if(queue.contains("gpu")){
+                            properties += ",gpu";
+                        }
                     }
                 }
-                if(data_set.contains("uva")){
+                else if(data_set.contains("vtech")){ 
+                    if(queue.contains("normal") || queue.contains("largemem") || queue.contains("vis") || queue.contains("open")){
+                        properties += queue;
+                    }
+                    else{
+                        deadline = Math.min(job_limit * 2, length + 30 * 60);
+                    }
+                }
+                else if(data_set.contains("uva")){
+                    if(queue.contains("largemem") || queue.contains("knl") || queue.contains("gpu")){
+                        properties += queue;
+                    }
+                    else if(!(queue.contains("standard") || queue.contains("parallel"))){
+                        deadline = Math.min(job_limit * 2, length + 30 * 60);
+                    }
+                }
+                else if(data_set.contains("iu")){
+
+                    if(queue.contains("debug")){
+                        deadline = Math.min(job_limit * 2, length + 30 * 60);
+                    }
+                    if(queue.contains("gpu")){
+                        properties += "gpu";
+                    }
+                }
+
+
+                /*if (data_set.contains("wagap") || data_set.contains("meta") || data_set.contains("ncbr") || data_set.contains("fairshare")) {
+                    String[] req_nodes = values[20].split(":");
+                    properties = values[20];
+                    for (int r = 0; r < req_nodes.length; r++) {
+                        if (req_nodes[r].contains("ppn=")) {
+                            String ppns = req_nodes[r].replace("ppn=", "");
+                            if (ppns.contains("#")) {
+                                int ind = ppns.indexOf("#");
+                                ppns = ppns.substring(0, ind);
+                            }
+                            // remove floating point values
+                            if (ppns.contains(".")) {
+                                int ind = ppns.indexOf('.');
+                                ppns = ppns.substring(0, ind);
+                            }
+
+                            // to do: 1:ppn=1+3:ppn=2 
+                            if (ppns.contains("+")) {
+                                break;
+                            }
+                            if (ppns.equals("1cl_zewura")) {
+                                ppn = 1;
+                            } else {
+                                ppn = Integer.parseInt(ppns);
+                            }
+                        }
+                    }
+
+                    if (ppn != -1) {
+                        // korekce chyby ve workloadu
+                        if (numCPU < ppn) {
+                            System.out.println(id + ": CPUs mismatch CPUs = " + numCPU + " nodespec = " + properties);
+                            numCPU = ppn;
+                        }
+                        numNodes = numCPU / ppn;
+                    } else {
+                        numNodes = 1;
+                        ppn = numCPU;
+                    }
+                    //System.out.println(id+" | "+values[20]+" nodes="+numNodes+" ppn="+ppn);
+                }*/ 
+                if (data_set.contains("zewura")) {
+                    numNodes = 1;
+                    ppn = numCPU;
+                } else if (data_set.contains("hpc2n")) {
+                    ppn = 2;
+                    if (numCPU < ppn) {
+                        ppn = numCPU;
+                        numNodes = 1;
+                    } else if (numCPU % 2 == 1) {
+                        ppn = 1;
+                        numNodes = numCPU;
+                    } else {
+                        Long nn = Math.round(Math.ceil(numCPU / ppn));
+                        numNodes = nn.intValue();
+                    }
+                    if (ppn * numNodes != numCPU) {
+                        System.out.println(id + ": numNodes value is wrong, CPUs = " + numCPU + " ppn = " + ppn);
+                    }
+                }
+
+                if (numCPU / numNodes != ppn) {
+                    System.out.println(id + ": CPUs mismatch CPUs = " + numCPU + " ppn = " + ppn + " nodes = " + numNodes);
+                    numCPU = ppn * numNodes;
+                }
+            }
+        } else{
+            if (values.length > 19) {
+                if(!values[19].equals("-1")){
+                    properties = values[19].split("=")[0];
+                    if(properties.equals("gpus")){
+                        properties = "gpu,";
+                    }else{
+                        properties += ",";
+                    }
+                }
+                if(institute.equals("vt")){
+                    if(queue.contains("normal") || queue.contains("open")){
+                        // properties += "," + queue;
+                    }
+                    else if(queue.contains("largemem")){
+                        properties += "largemem";
+                    }
+                    else if(queue.contains("vis")){
+                        properties += "gpu";
+                    }
+                    else{
+                        deadline = Math.min(job_limit * 2, length + 30 * 60);
+                    }
+                }
+                else if(institute.equals("uva")){
                     if(queue.contains("largemem") || queue.contains("knl") || queue.contains("gpu")){
                         properties += "," + queue;
                     }
-                }
-            }
-            else if(data_set.contains("vtech")){ 
-                if(queue.contains("normal") || queue.contains("dev") || queue.contains("vis") || queue.contains("open")){
-                    properties += queue;
-                }
-                else{
-                    deadline = Math.min(job_limit * 2, job_limit + 30 *60);
-                }
-            }
-            else if(data_set.contains("uva")){
-                if(queue.contains("largemem") || queue.contains("knl") || queue.contains("gpu")){
-                    properties += "," + queue;
-                }
-                else if(!(queue.contains("standard") || queue.contains("dev"))){
-                    deadline = Math.min(job_limit * 2, job_limit + 30 *60);
-                }
-            }
-               
-
-            /*if (data_set.contains("wagap") || data_set.contains("meta") || data_set.contains("ncbr") || data_set.contains("fairshare")) {
-                String[] req_nodes = values[20].split(":");
-                properties = values[20];
-                for (int r = 0; r < req_nodes.length; r++) {
-                    if (req_nodes[r].contains("ppn=")) {
-                        String ppns = req_nodes[r].replace("ppn=", "");
-                        if (ppns.contains("#")) {
-                            int ind = ppns.indexOf("#");
-                            ppns = ppns.substring(0, ind);
-                        }
-                        // remove floating point values
-                        if (ppns.contains(".")) {
-                            int ind = ppns.indexOf('.');
-                            ppns = ppns.substring(0, ind);
-                        }
-
-                        // to do: 1:ppn=1+3:ppn=2 
-                        if (ppns.contains("+")) {
-                            break;
-                        }
-                        if (ppns.equals("1cl_zewura")) {
-                            ppn = 1;
-                        } else {
-                            ppn = Integer.parseInt(ppns);
-                        }
+                    else{
+                        deadline = Math.min(job_limit * 2, length + 30 * 60);
                     }
                 }
+                else if(institute.equals("iu")){
+                    if(queue.contains("debug")){
+                        deadline = Math.min(job_limit * 2, length + 30 * 60);
+                    }
+                    if(queue.contains("gpu")){
+                        properties += "gpu";
+                    }
+                }
+                
+                
 
-                if (ppn != -1) {
-                    // korekce chyby ve workloadu
+                /*if (data_set.contains("wagap") || data_set.contains("meta") || data_set.contains("ncbr") || data_set.contains("fairshare")) {
+                    String[] req_nodes = values[20].split(":");
+                    properties = values[20];
+                    for (int r = 0; r < req_nodes.length; r++) {
+                        if (req_nodes[r].contains("ppn=")) {
+                            String ppns = req_nodes[r].replace("ppn=", "");
+                            if (ppns.contains("#")) {
+                                int ind = ppns.indexOf("#");
+                                ppns = ppns.substring(0, ind);
+                            }
+                            // remove floating point values
+                            if (ppns.contains(".")) {
+                                int ind = ppns.indexOf('.');
+                                ppns = ppns.substring(0, ind);
+                            }
+
+                            // to do: 1:ppn=1+3:ppn=2 
+                            if (ppns.contains("+")) {
+                                break;
+                            }
+                            if (ppns.equals("1cl_zewura")) {
+                                ppn = 1;
+                            } else {
+                                ppn = Integer.parseInt(ppns);
+                            }
+                        }
+                    }
+
+                    if (ppn != -1) {
+                        // korekce chyby ve workloadu
+                        if (numCPU < ppn) {
+                            System.out.println(id + ": CPUs mismatch CPUs = " + numCPU + " nodespec = " + properties);
+                            numCPU = ppn;
+                        }
+                        numNodes = numCPU / ppn;
+                    } else {
+                        numNodes = 1;
+                        ppn = numCPU;
+                    }
+                    //System.out.println(id+" | "+values[20]+" nodes="+numNodes+" ppn="+ppn);
+                }*/ 
+                if (data_set.contains("zewura")) {
+                    numNodes = 1;
+                    ppn = numCPU;
+                } else if (data_set.contains("hpc2n")) {
+                    ppn = 2;
                     if (numCPU < ppn) {
-                        System.out.println(id + ": CPUs mismatch CPUs = " + numCPU + " nodespec = " + properties);
-                        numCPU = ppn;
+                        ppn = numCPU;
+                        numNodes = 1;
+                    } else if (numCPU % 2 == 1) {
+                        ppn = 1;
+                        numNodes = numCPU;
+                    } else {
+                        Long nn = Math.round(Math.ceil(numCPU / ppn));
+                        numNodes = nn.intValue();
                     }
-                    numNodes = numCPU / ppn;
-                } else {
-                    numNodes = 1;
-                    ppn = numCPU;
+                    if (ppn * numNodes != numCPU) {
+                        System.out.println(id + ": numNodes value is wrong, CPUs = " + numCPU + " ppn = " + ppn);
+                    }
                 }
-                //System.out.println(id+" | "+values[20]+" nodes="+numNodes+" ppn="+ppn);
-            }*/ 
-            if (data_set.contains("zewura")) {
-                numNodes = 1;
-                ppn = numCPU;
-            } else if (data_set.contains("hpc2n")) {
-                ppn = 2;
-                if (numCPU < ppn) {
-                    ppn = numCPU;
-                    numNodes = 1;
-                } else if (numCPU % 2 == 1) {
-                    ppn = 1;
-                    numNodes = numCPU;
-                } else {
-                    Long nn = Math.round(Math.ceil(numCPU / ppn));
-                    numNodes = nn.intValue();
-                }
-                if (ppn * numNodes != numCPU) {
-                    System.out.println(id + ": numNodes value is wrong, CPUs = " + numCPU + " ppn = " + ppn);
-                }
-            }
 
-            if (numCPU / numNodes != ppn) {
-                System.out.println(id + ": CPUs mismatch CPUs = " + numCPU + " ppn = " + ppn + " nodes = " + numNodes);
-                numCPU = ppn * numNodes;
+                if (numCPU / numNodes != ppn) {
+                    System.out.println(id + ": CPUs mismatch CPUs = " + numCPU + " ppn = " + ppn + " nodes = " + numNodes);
+                    numCPU = ppn * numNodes;
+                }
             }
         }
 

@@ -1,0 +1,19 @@
+0	Blueridge0	130	16	1	67108864	3	vt	mic
+1	Blueridge1	4	16	1	67108864	5	vt	gpu
+2	Blueridge2	256	16	1	67108864	1	vt	
+3	Blueridge3	18	16	1	134217728	2	vt	highmem	
+4	Cascades0	2	72	1	3221225472	3	vt	largemem
+5	Cascades1	4	32	1	536870912	5	vt	gpu
+6	Cascades2	190	32	1	134217728	2	vt	
+7	DragonsTooth	48	24	1	268435456	1	vt		
+8	NewRiver0	2	60	1	3221225472	3	vt	largemem
+9	NewRiver1	39	28	1	536870912	5	vt	gpu
+10	NewRiver2	8	24	1	536870912	5	vt	gpu
+11	NewRiver3	16	24	1	536870912	2	vt	
+12	NewRiver4	100	24	1	134217728	1	vt	
+13	bigred2	344	32	1	67108864	2	iu
+14	bigred2-gpu	676	16	1	33554432	5	iu	gpu
+15	parallel0	240	20	1	134217728	2	uva
+16	largemem	5	16	1	1073741824	3	uva	largemem
+17	gpu	14	28	1	268435456	5	uva	gpu	
+18	knl	8	64	1	205520896	3	uva	knl

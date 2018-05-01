@@ -25,8 +25,8 @@ public class CostComparator implements Comparator{
         double inst1 = 0;
         double inst2 = 0;
         if(institute != null){
-            inst1 = (institute.equals(g1.getInstitute()))? 0:0.5;
-            inst2 = (institute.equals(g2.getInstitute()))? 0:0.5;
+            inst1 = (institute.equals(g1.resource.getInstitute()))? 0:0.5;
+            inst2 = (institute.equals(g2.resource.getInstitute()))? 0:0.5;
         }
         double length1 = (Double) g1.resource.getCostPerSec() + inst1;
         double length2 = (Double) g2.resource.getCostPerSec() + inst2;

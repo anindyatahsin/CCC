@@ -34,7 +34,7 @@ public class PBS_PRO implements SchedulingPolicy {
 
     @Override
     public void addNewJob(GridletInfo gi) {
-        if (!Scheduler.data_set.contains("meta")) {
+        if (!Scheduler.data_set.contains("ccc")) {
             double runtime1 = new Date().getTime();
             int index = Scheduler.all_queues_names.indexOf(gi.getQueue());
             if (index == -1) {
@@ -109,120 +109,120 @@ public class PBS_PRO implements SchedulingPolicy {
             }
             // All remaining non standard queues are considered to be normal
             Scheduler.q3.addLast(gi);
-        } else if(Scheduler.data_set.contains("vtech")) {
+        } else if(gi.getGridlet().getInst().equals("vt")) {
             if (gi.getQueue().equals("normal_q")) {
-                Scheduler.normal_q.addLast(gi);
+                Scheduler.low_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("dev_q")) {
-                Scheduler.dev_q.addLast(gi);
+                Scheduler.high_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("vis_q")) {
-                Scheduler.vis_q.addLast(gi);
+                Scheduler.regular_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("largemem_q")) {
-                Scheduler.largemem_q.addLast(gi);
+                Scheduler.regular_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("p100_dev_q")) {
-                Scheduler.p100_dev_q.addLast(gi);
+                Scheduler.high_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("p100_normal_q")) {
-                Scheduler.p100_normal_q.addLast(gi);
+                Scheduler.low_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("open_q")) {
-                Scheduler.open_q.addLast(gi);
+                Scheduler.regular_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
 
             // All remaining non standard queues are considered to be normal
-            Scheduler.lab_q.addLast(gi);
+            Scheduler.high_q.addLast(gi);
         }
-        else if(Scheduler.data_set.contains("uva")) {
-            if (gi.getQueue().equals("normal")) {
-                Scheduler.normal.addLast(gi);
-                Scheduler.runtime += (new Date().getTime() - runtime1);
-                return;
-            }
+        else if(gi.getGridlet().getInst().equals("uva")) {
             if (gi.getQueue().equals("dev")) {
-                Scheduler.dev.addLast(gi);
+                Scheduler.high_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("standard")) {
-                Scheduler.standard.addLast(gi);
+                Scheduler.low_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("largemem")) {
-                Scheduler.largemem.addLast(gi);
+                Scheduler.regular_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("gpu")) {
-                Scheduler.gpu.addLast(gi);
+                Scheduler.regular_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("parallel")) {
-                Scheduler.parallel.addLast(gi);
+                Scheduler.low_q.addLast(gi);
+                Scheduler.runtime += (new Date().getTime() - runtime1);
+                return;
+            }
+            if (gi.getQueue().equals("knl")) {
+                Scheduler.regular_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
 
             // All remaining non standard queues are considered to be normal
-            Scheduler.lab_q.addLast(gi);
+            Scheduler.high_q.addLast(gi);
         }
         
-        else if(Scheduler.data_set.contains("iu")) {
+        else if(gi.getGridlet().getInst().equals("iu")) {
             if (gi.getQueue().equals("normal")) {
-                Scheduler.normal.addLast(gi);
+                Scheduler.low_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("debug_gpu")) {
-                Scheduler.debug_cpu.addLast(gi);
+                Scheduler.high_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("debug_cpu")) {
-                Scheduler.debug_gpu.addLast(gi);
+                Scheduler.high_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("cpu16")) {
-                Scheduler.cpu.addLast(gi);
+                Scheduler.low_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("gpu")) {
-                Scheduler.gpu.addLast(gi);
+                Scheduler.regular_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("long")) {
-                Scheduler.longq.addLast(gi);
+                Scheduler.regular_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("serial")) {
-                Scheduler.serial.addLast(gi);
+                Scheduler.low_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             // All remaining non standard queues are considered to be normal
-            Scheduler.lab_q.addLast(gi);
+            Scheduler.high_q.addLast(gi);
         }
         Scheduler.runtime += (new Date().getTime() - runtime1);
 
@@ -260,7 +260,7 @@ public class PBS_PRO implements SchedulingPolicy {
                 
                 GridletInfo gi = (GridletInfo) Scheduler.queue.get(i);
                 ArrayList<ResourceInfo> rsInfoList = Scheduler.resourceInfoList;
-                Collections.sort(rsInfoList, new CostComparator(gi.getInst()));
+                Collections.sort(rsInfoList, new CostComparator(gi.getGridlet().getInst()));
                 for (int j = 0; j < Scheduler.resourceInfoList.size(); j++) {
                     ResourceInfo ri = (ResourceInfo) Scheduler.resourceInfoList.get(j);
                     if (Scheduler.isSuitable(ri, gi) && ri.canExecuteNow(gi)) {
