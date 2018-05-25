@@ -1,13 +1,13 @@
-0	Blueridge0	130	16	1	67108864	3	vt	mic,normal_q,dev_q,open_q
-1	Blueridge1	4	16	1	67108864	5	vt	gpus,normal_q,dev_q,vis_q open_q
-2	Blueridge2	256	16	1	67108864	1	vt	normal_q,dev_q,vis_q,open_q
-3	Blueridge3	18	16	1	134217728	2	vt	highmem,normal_q,dev_q,vis_q,open_q	
-4	Cascades0	2	72	1	3221225472	3	vt	largemem_q
-5	Cascades1	4	32	1	536870912	5	vt	gpus,vis_q,normal_q,dev_q,open_q
-6	Cascades2	190	32	1	134217728	2	vt	normal_q,dev_q,open_q
+0	Blueridge0	130	16	1	67108864	3	vt	mic,normal_q,dev_q,open_q,mpi
+1	Blueridge1	4	16	1	67108864	5	vt	gpu,normal_q,dev_q,vis_q,open_q,mpi
+2	Blueridge2	256	16	1	67108864	2	vt	normal_q,dev_q,vis_q,open_q,mpi
+3	Blueridge3	18	16	1	134217728	2.5	vt	highmem,normal_q,dev_q,vis_q,open_q,mpi	
+4	Cascades0	2	72	1	3221225472	5	vt	largemem_q
+5	Cascades1	4	32	1	536870912	5	vt	gpu,vis_q,normal_q,dev_q,open_q,mpi
+6	Cascades2	190	32	1	134217728	2	vt	normal_q,dev_q,open_q,mpi
 7	DragonsTooth	48	24	1	268435456	1	vt	normal_q,dev_q,open_q	
-8	NewRiver0	2	60	1	3221225472	3	vt	largemem_q
-9	NewRiver1	39	28	1	536870912	5	vt	gpus,P100_normal_q, P100_dev_q
-10	NewRiver2	8	24	1	536870912	5	vt	gpus,vis_q
-11	NewRiver3	16	24	1	536870912	2	vt	normal_q,dev_q,open_q
-12	NewRiver4	100	24	1	134217728	1	vt	normal_q,dev_q,open_q
+8	NewRiver0	2	60	1	3221225472	5	vt	largemem_q
+9	NewRiver1	39	28	1	536870912	5	vt	gpu,p100_normal_q,p100_dev_q,mpi
+10	NewRiver2	8	24	1	536870912	5	vt	gpu,vis_q
+11	NewRiver3	16	24	1	536870912	2	vt	normal_q,dev_q,open_q,mpi
+12	NewRiver4	100	24	1	134217728	2	vt	normal_q,dev_q,open_q,mpi

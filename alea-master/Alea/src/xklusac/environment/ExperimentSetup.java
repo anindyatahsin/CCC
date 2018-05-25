@@ -185,6 +185,10 @@ public class ExperimentSetup {
      */
     static String name;
     /**
+     * An integer that denotes the multiplication factor for uva
+     */
+    static int uva_factor;
+    /**
      * Arrival of the first job (all jobs are normalized to this value).
      */
     public static int firstArrival = -1;
@@ -393,6 +397,7 @@ public class ExperimentSetup {
         data = aCfg.getBoolean("data");
         use_heap = aCfg.getBoolean("use_heap");
         sld_tresh = aCfg.getDouble("sld_tresh");
+        uva_factor = aCfg.getInt("uva_factor");
         
         algID = 0;
         prevAlgID = -1;

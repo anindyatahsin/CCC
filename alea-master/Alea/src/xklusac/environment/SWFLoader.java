@@ -78,6 +78,7 @@ public class SWFLoader extends GridSim {
     long prevram = -1;
     long prev_job_limit = -1;
     int count = 1;
+    int uva_factor = ExperimentSetup.uva_factor ;
 
     /**
      * Creates a new instance of JobLoader
@@ -277,10 +278,15 @@ public class SWFLoader extends GridSim {
 
         }
         arrival = Math.round(new Double(arrival) / ExperimentSetup.arrival_rate_multiplier);
-
+        String institute = values[18];
         // minPErating is the default speed of the slowest machine in the data set        
         double length = Math.round((Integer.parseInt(values[3])) * maxPErating);
-
+        if(length <= 10){
+            length = 10;
+        }
+        if(institute.equals("uva")){
+            length = length * uva_factor;
+        }
         // queue name
         String queue = values[14];
 
@@ -329,6 +335,12 @@ public class SWFLoader extends GridSim {
         // finally create gridlet
         //numCPU = 1;
         long job_limit = Integer.parseInt(values[8]);
+        if(job_limit <= 10){
+            job_limit = 10;
+        }
+        if(institute.equals("uva")){
+            job_limit = job_limit * uva_factor;
+        }
         if (job_limit < 0) {
             // atlas = 432000
             // thunder = 432000
@@ -382,55 +394,77 @@ public class SWFLoader extends GridSim {
             numNodes = s.length;
             System.out.println("Job " + id + " requested node " + s[0] + " and length " + numNodes);
         }
-        double deadline = job_limit * 2;
+        double deadline = Math.max(job_limit * 2, length + 30 * 60);;
         try{
             ppn = Integer.parseInt(values[17]);
         }catch(NumberFormatException e){
             System.out.println(id);
             e.printStackTrace();
         } 
-        String institute = values[18];
+        
         //System.out.println(institute);
         if(!data_set.contains("ccc")){
             if (values.length > 19) {
                 if(!values[19].equals("-1")){
                     properties = values[19].split("=")[0];
+                    if(properties.contains("gpus")){
+                        properties = "gpu";
+                    }
+                        
                     if(data_set.contains("vtech")){
-                        if(queue.contains("normal") || queue.contains("largemem") || queue.contains("vis") || queue.contains("open")){
+                        
+                        if(queue.contains("normal_q") || queue.contains("largemem") || queue.contains("vis") || queue.contains("open") || queue.contains("p100")){
                             properties += "," + queue;
+                            deadline = Math.max(job_limit * 2, length + 30 * 60);
                         }
                         else{
                             deadline = Math.min(job_limit * 2, length + 30 * 60);
                         }
                     }
                     if(data_set.contains("uva")){
-                        if(queue.contains("largemem") || queue.contains("knl") || queue.contains("gpu")){
+                        if(queue.contains("largemem")){
                             properties += "," + queue;
+                            deadline = Math.max(job_limit * 2, length + 30 * 60);
                         }
-                        else{
+                        else if(queue.contains("knl") || queue.contains("gpu")){
+                            properties += "," + queue;
+                            deadline = Math.min(job_limit * 2, length + 30 * 60);
+                        }
+                        else if(!(queue.contains("standard") || queue.contains("parallel"))){
                             deadline = Math.min(job_limit * 2, length + 30 * 60);
                         }
                     }
                     else if(data_set.contains("iu")){
-                        if(queue.contains("debug")){
+                        if(queue.contains("debug") || queue.contains("cpu")){
                             deadline = Math.min(job_limit * 2, length + 30 * 60);
                         }
                         if(queue.contains("gpu")){
+                            deadline = Math.max(job_limit * 2, length + 30 * 60);
                             properties += ",gpu";
                         }
                     }
                 }
                 else if(data_set.contains("vtech")){ 
-                    if(queue.contains("normal") || queue.contains("largemem") || queue.contains("vis") || queue.contains("open")){
+                    
+                    if(queue.contains("normal_q") || queue.contains("largemem") || queue.contains("vis") || queue.contains("open") || queue.contains("p100")){
                         properties += queue;
+                        deadline = Math.max(job_limit * 2, length + 30 * 60);
                     }
                     else{
+                        deadline = Math.min(job_limit * 2, length + 30 * 60);
+                    } 
+                    if(queue.contains("dev_q")){
                         deadline = Math.min(job_limit * 2, length + 30 * 60);
                     }
                 }
                 else if(data_set.contains("uva")){
-                    if(queue.contains("largemem") || queue.contains("knl") || queue.contains("gpu")){
+                    if(queue.contains("largemem")){
                         properties += queue;
+                        deadline = Math.max(job_limit * 2, length + 30 * 60);
+                    }
+                    else if(queue.contains("knl") || queue.contains("gpu")){
+                        properties += queue;
+                        deadline = Math.min(job_limit * 2, length + 30 * 60);
                     }
                     else if(!(queue.contains("standard") || queue.contains("parallel"))){
                         deadline = Math.min(job_limit * 2, length + 30 * 60);
@@ -438,56 +472,16 @@ public class SWFLoader extends GridSim {
                 }
                 else if(data_set.contains("iu")){
 
-                    if(queue.contains("debug")){
+                    if(queue.contains("debug") || queue.contains("cpu")){
                         deadline = Math.min(job_limit * 2, length + 30 * 60);
                     }
                     if(queue.contains("gpu")){
                         properties += "gpu";
+                        deadline = Math.max(job_limit * 2, length + 30 * 60);
                     }
                 }
 
 
-                /*if (data_set.contains("wagap") || data_set.contains("meta") || data_set.contains("ncbr") || data_set.contains("fairshare")) {
-                    String[] req_nodes = values[20].split(":");
-                    properties = values[20];
-                    for (int r = 0; r < req_nodes.length; r++) {
-                        if (req_nodes[r].contains("ppn=")) {
-                            String ppns = req_nodes[r].replace("ppn=", "");
-                            if (ppns.contains("#")) {
-                                int ind = ppns.indexOf("#");
-                                ppns = ppns.substring(0, ind);
-                            }
-                            // remove floating point values
-                            if (ppns.contains(".")) {
-                                int ind = ppns.indexOf('.');
-                                ppns = ppns.substring(0, ind);
-                            }
-
-                            // to do: 1:ppn=1+3:ppn=2 
-                            if (ppns.contains("+")) {
-                                break;
-                            }
-                            if (ppns.equals("1cl_zewura")) {
-                                ppn = 1;
-                            } else {
-                                ppn = Integer.parseInt(ppns);
-                            }
-                        }
-                    }
-
-                    if (ppn != -1) {
-                        // korekce chyby ve workloadu
-                        if (numCPU < ppn) {
-                            System.out.println(id + ": CPUs mismatch CPUs = " + numCPU + " nodespec = " + properties);
-                            numCPU = ppn;
-                        }
-                        numNodes = numCPU / ppn;
-                    } else {
-                        numNodes = 1;
-                        ppn = numCPU;
-                    }
-                    //System.out.println(id+" | "+values[20]+" nodes="+numNodes+" ppn="+ppn);
-                }*/ 
                 if (data_set.contains("zewura")) {
                     numNodes = 1;
                     ppn = numCPU;
@@ -517,14 +511,16 @@ public class SWFLoader extends GridSim {
             if (values.length > 19) {
                 if(!values[19].equals("-1")){
                     properties = values[19].split("=")[0];
-                    if(properties.equals("gpus")){
+                    if(properties.contains("gpus")){
                         properties = "gpu,";
                     }else{
                         properties += ",";
                     }
+                }else{
+                    properties = "";
                 }
                 if(institute.equals("vt")){
-                    if(queue.contains("normal") || queue.contains("open")){
+                    if(queue.equals("normal_q") || queue.contains("open")){
                         // properties += "," + queue;
                     }
                     else if(queue.contains("largemem")){
@@ -532,29 +528,43 @@ public class SWFLoader extends GridSim {
                     }
                     else if(queue.contains("vis")){
                         properties += "gpu";
+                    }    
+                    else if(queue.contains("p100")){
+                        properties += "gpu";
+                        //deadline = Math.min(job_limit * 2, length + 30 * 60);
                     }
                     else{
                         deadline = Math.min(job_limit * 2, length + 30 * 60);
                     }
                 }
                 else if(institute.equals("uva")){
-                    if(queue.contains("largemem") || queue.contains("knl") || queue.contains("gpu")){
-                        properties += "," + queue;
+                    if(queue.contains("largemem")){
+                        properties += queue;
                     }
-                    else{
+                    else if(queue.contains("knl") ){
+                        properties += queue;
                         deadline = Math.min(job_limit * 2, length + 30 * 60);
+                    }
+                    else if(queue.contains("gpu")){
+                        properties += queue;
+                        deadline = Math.max(job_limit * 2, length + 30 * 60);
+                    }
+                    else if(!(queue.contains("standard") || queue.contains("parallel"))){
+                        deadline = Math.min(job_limit * 2, length + 30 * 60);
+                    } else{
+                        //deadline = Math.min(job_limit * 2, length + 30 * 60);
                     }
                 }
                 else if(institute.equals("iu")){
-                    if(queue.contains("debug")){
+                    if(queue.contains("debug") || queue.contains("cpu")){
                         deadline = Math.min(job_limit * 2, length + 30 * 60);
                     }
                     if(queue.contains("gpu")){
                         properties += "gpu";
                     }
                 }
-                
-                
+
+
 
                 /*if (data_set.contains("wagap") || data_set.contains("meta") || data_set.contains("ncbr") || data_set.contains("fairshare")) {
                     String[] req_nodes = values[20].split(":");
@@ -621,9 +631,37 @@ public class SWFLoader extends GridSim {
                     System.out.println(id + ": CPUs mismatch CPUs = " + numCPU + " ppn = " + ppn + " nodes = " + numNodes);
                     numCPU = ppn * numNodes;
                 }
+                
+            }
+            
+        }
+        if(numNodes > 1){
+        //System.out.println(id + " " + institute + " " + properties + " " + numNodes + " " + numCPU);
+            /*if(!properties.equals(""))
+                properties += "mpi";
+            else
+                properties += "mpi";
+            */
+            if(properties.endsWith(",") || properties.equals("")){
+                properties += "mpi";
+            }else{
+                properties += ",mpi";
             }
         }
-
+        if(length < 30*60 && data_set.contains("ccc")){
+        //System.out.println(id + " " + institute + " " + properties + " " + numNodes + " " + numCPU);
+            /*if(!properties.equals(""))
+                properties += "mpi";
+            else
+                properties += "mpi";
+            */
+            if(properties.endsWith(",") || properties.equals("")){
+                properties += institute;
+            }else{
+                properties += "," + institute;
+            }
+        }
+        
         // obsolete and useless
         double perc = norm.sample();
 

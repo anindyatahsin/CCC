@@ -128,7 +128,7 @@ public class GridletInfo {
         this.inst = inst;
     }
 
-    private HashMap<Integer, Boolean> resourceSuitable;
+    //private HashMap<Integer, Boolean> resourceSuitable;
 
     /**
      * Creates a new instance of GridletInfo object based on the "real" gridlet
@@ -168,11 +168,11 @@ public class GridletInfo {
         this.setRam(gl.getRam());
         this.setNumNodes(gl.getNumNodes());
         this.setPpn(gl.getPpn());
-        this.setResourceSuitable(rsInfo);
+        this.getGridlet().setResourceSuitable(rsInfo);
         this.setInst(gl.getInst());
     }
     
-    public GridletInfo(ComplexGridlet gl) {
+    /*public GridletInfo(ComplexGridlet gl) {
 
         this.setOwnerID(gl.getUserID());
         this.setID(gl.getGridletID());
@@ -206,7 +206,7 @@ public class GridletInfo {
         this.setPpn(gl.getPpn());
         this.setResourceSuitable(new HashMap());
         this.setInst(gl.getInst());
-    }
+    }*/
 
     /**
      * Getter method
@@ -680,44 +680,5 @@ public class GridletInfo {
     public void setPpn(int ppn) {
         this.ppn = ppn;
     }
-
-    /**
-     * @return the resourceSuitable
-     */
-    public HashMap getResourceSuitable() {
-        return resourceSuitable;
-    }
-
-    /**
-     * @param resourceSuitable the resourceSuitable to set
-     */
-    public void setResourceSuitable(HashMap resourceSuitable) {
-        this.resourceSuitable = resourceSuitable;
-    }
     
-    /**
-     * @param rsInfo list of all the available resources to check if the resource is suitable
-     */
-    public void setResourceSuitable(ArrayList<ResourceInfo> rsInfo) {
-        //this.resourceSuitable = resourceSuitable;
-        resourceSuitable = new HashMap<>();
-        for(int i = 0; i < rsInfo.size(); i++){
-            ResourceInfo ri = rsInfo.get(i);
-            String[] ri_p = ri.resource.getProperties().split(",");
-            String[] gi_p = getGridlet().getProperties().split(",");
-            int j = 0, k = 0;
-            boolean match = true;
-            for(j = 0; j < gi_p.length; j++){
-                for(k = 0; k < ri_p.length; k++){
-                    if(gi_p[j].equals(ri_p[k])) break;
-                }
-                if(k == ri_p.length){ 
-                    match = false;
-                    break;
-                }
-            }
-            resourceSuitable.put(ri.resource.getResourceID(), match);
-        }
-        
-    }
 }

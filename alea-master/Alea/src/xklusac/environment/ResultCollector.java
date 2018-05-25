@@ -15,6 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import xklusac.extensions.Input;
 import xklusac.extensions.Output;
@@ -57,8 +58,10 @@ public class ResultCollector {
     double day_usage = 0.0;
     double week_usage = 0.0;
     int week_count = 0;
-    double value = 0;
-    double cost = 0;
+    HashMap<String,Double> value_i = new HashMap<>();
+    HashMap<String,Double> cost_i = new HashMap<>();
+    double value = 0.0;
+    double cost = 0.0;
     //double run_time = 0.0;
     /**
      * denotes total flow time
@@ -414,7 +417,7 @@ public class ResultCollector {
             this.pw2 = new PrintWriter(new FileWriter(FileUtil.getPath(user_dir + "/jobs(" + problem + "" + ExperimentSetup.algID + ").csv"), true));
             this.pwc = new PrintWriter(new FileWriter(FileUtil.getPath(user_dir + "/complain(" + problem + "" + ExperimentSetup.algID + ").csv"), true));
 
-            out.writeStringWriter(pw, "giID , arrival , wait , runtime , CPUs , RAM , userID , queue");
+            out.writeStringWriter(pw, "giID , arrival , wait , runtime , CPUs , RAM , userID , jobIns, value, resIns, priority, cost,ResID, queue, Properties, ..., ...");
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -425,12 +428,13 @@ public class ResultCollector {
      * Stores all information about currently finished job.
      */
     public void addFinishedJobToResults(ComplexGridlet gridlet_received, ArrayList resourceInfoList) {
-        GridletInfo gi = new GridletInfo(gridlet_received);
+        GridletInfo gi = new GridletInfo(gridlet_received, resourceInfoList);
         received++;
         double finish_time = 0.0;
         double cpu_time = 0.0;
         double mips = 0.0;
         double arrival = 0.0;
+        String queue_name = "";
         if (gridlet_received.getGridletStatus() == Gridlet.FAILED_RESOURCE_UNAVAILABLE || gridlet_received.getGridletStatus() == Gridlet.FAILED) {
             failed++;
             finish_time = Math.max(gi.getGridlet().getArrival_time(), (gi.getGridlet().getExecStartTime() + gi.getGridlet().getActualCPUTime()));
@@ -487,12 +491,14 @@ public class ResultCollector {
         double jobValue = 0;
         //System.out.println("ID: " + gi.getID() + " Inst: " + gi.getGridlet().getInst());
         if(gi.getGridlet().getInst().equals("vt")){
-            if(queue.contains("lab") || queue.contains("dev")){
+            if(queue.contains("lab") || queue.contains("dev") || queue.contains("deq") ){
                 if(finish_time > gridlet_received.getDue_date()){
+                    //jobValue = gi.getNumPE() * cpu_time / 3600;
                     jobValue = 0;
                     missed++;
                 }
                 else{
+                    queue_name = "hp";
                     jobValue = 4 * gi.getNumPE() * gi.getLength() / 3600;
                     hpJobs++;
                 }
@@ -503,47 +509,58 @@ public class ResultCollector {
                     missed++;
                 }
                 else{ 
-                    if(queue.contains("normal") || queue.contains("open")){
+                    if(queue.contains("normal")){
+                        jobValue = gi.getNumPE() * gi.getLength() / 3600;
                         lpJobs++;
+                        queue_name = "lp";
                     } else {
+                        queue_name = "mp";
+                        jobValue = gi.getNumPE() * gi.getLength() / 3600;
                         mpJobs++;
                     }
-                    jobValue = gi.getNumPE() * gi.getLength() / 3600;
+                    
                 }
             }
         } else if(gi.getGridlet().getInst().equals("uva")){
-            if(queue.contains("dev") || queue.contains("eqa")){
-                if(finish_time > gridlet_received.getDue_date()){
-                    jobValue = 0;
-                    missed++;
-                }
-                else{
-                    jobValue = 4 * gi.getNumPE() * gi.getLength() / 3600;
-                    hpJobs++;
-                }
-            }
-            else{
-                if(finish_time > gridlet_received.getDue_date()){
-                    jobValue = 0;
-                    missed++;
-                }
-                else{ 
-                    if(queue.contains("standard") || queue.contains("parallel")){
-                        lpJobs++;
-                    } else {
-                        mpJobs++;
-                    }
-                    jobValue = gi.getNumPE() * gi.getLength() / 3600;
-                }
-            }
-        } else if(gi.getGridlet().getInst().equals("iu")){
-            if(queue.contains("debug")){
+            if(queue.contains("dev") || queue.contains("eqa") || queue.equals("knl")){
                 
                 if(finish_time > gridlet_received.getDue_date()){
                     jobValue = 0;
                     missed++;
                 }
                 else{
+                    queue_name = "hp";
+                    jobValue = 4 * gi.getNumPE() * gi.getLength() / 3600;
+                    hpJobs++;
+                }
+            }
+            else{
+                if(finish_time > gridlet_received.getDue_date()){
+                    jobValue = 0;
+                    missed++;
+                }
+                else{ 
+                    if(queue.contains("standard")){
+                        queue_name = "lp";
+                        lpJobs++;
+                        jobValue = gi.getNumPE() * gi.getLength() / 3600;
+                    } else {
+                        queue_name = "mp";
+                        jobValue = gi.getNumPE() * gi.getLength() / 3600;
+                        mpJobs++;
+                    }
+                    
+                }
+            }
+        } else if(gi.getGridlet().getInst().equals("iu")){
+            if(queue.contains("debug") || queue.contains("cpu")){
+                //queue_name = "hp";
+                if(finish_time > gridlet_received.getDue_date()){
+                    jobValue = 0;
+                    missed++;
+                }
+                else{
+                    queue_name = "hp";
                     jobValue = 4 * gi.getNumPE() * gi.getLength() / 3600;
                     hpJobs++;
                 }
@@ -554,19 +571,21 @@ public class ResultCollector {
                     missed++;
                 } 
                 else{ 
-                    if(queue.contains("gpu")){
+                    if(queue.contains("gpu") ){
+                        queue_name = "mp";
+                        jobValue = gi.getNumPE() * gi.getLength() / 3600;
                         mpJobs++;
                     } else {
+                        queue_name = "lp";
+                        jobValue = gi.getNumPE() * gi.getLength() / 3600;
                         lpJobs++;
-                    }
-                    jobValue = gi.getNumPE() * gi.getLength() / 3600;
-            
+                    }   
                 }
             }
         }
         
         String properties = gi.getProperties();
-        if(properties.contains("gpu") || properties.contains("vis_q")){
+        if(properties.contains("gpu") || properties.contains("vis_q") || properties.contains("p100")){
             jobValue = jobValue * 5;
         }
         if(properties.contains("largemem")){
@@ -579,9 +598,11 @@ public class ResultCollector {
             jobValue = jobValue * 3;
         }
         if(properties.contains("highmem")){
+            jobValue = jobValue * 1.5;
+        }
+        if(properties.contains("mpi")){
             jobValue = jobValue * 2;
         }
-        
         
         
        
@@ -602,7 +623,8 @@ public class ResultCollector {
         try {
             // giID - wait - runtime - userID - numPE - ram - arrival - queue
             out.writeStringWriterErr(pw2, gridlet_received.getGridletID() + "," + Math.max(0.0, (response - cpu_time))
-                    + "," + cpu_time + "," + gi.getUser() + "," + gi.getNumPE() + "," + gi.getRam() + "," + gi.getRelease_date() + "," + gi.getQueue() );
+                    + "," + gi.getLength() + "," + gi.getUser() + "," + gi.getNumPE() + "," + gi.getRam() + "," + gi.getRelease_date() + "," + gi.getQueue()
+                    + "," + queue_name);
             String prob = "_";
             prob += ExperimentSetup.algID + "_" + ExperimentSetup.name;
 
@@ -617,10 +639,31 @@ public class ResultCollector {
             } else {
                 prob += "_stradani";
             }
-
+            ResourceInfo ri = null;
+            double curCost = 0;
+            for (int j = 0; j < resourceInfoList.size(); j++) {
+                ri = (ResourceInfo) resourceInfoList.get(j);
+                if (gridlet_received.getResourceID() == ri.resource.getResourceID()) {
+                    // we lower the load of resource, update info about overall tardiness and exit cycle
+                    ri.lowerResInExec(gi);
+                    ri.prev_tard += g_tard;
+                    if (g_tard <= 0.0) {
+                        ri.prev_score++;
+                    }
+                    curCost = gi.getNumPE() * gi.getLength() * ri.resource.getCostPerSec()/3600;
+                    
+                    break;
+                }
+            }
+            cost += curCost;
+            if(ri == null){
+                System.err.println("Invalid resource-id for job:" +  gi.getID() + " resource id:" + gi.getResourceID());
+                return;
+            }
             String line = gridlet_received.getGridletID() + "," + Math.round(gi.getRelease_date()) + "," + Math.round(Math.max(0.0, (response - cpu_time)) * 10) / 10.0
-                    + "," + Math.round(cpu_time * 10) / 10.0 + "," + gi.getNumPE() + "," + gi.getRam() + "," + gi.getUser() + "," + gi.getQueue()
-                    + "," + gi.getResourceID();
+                    + "," + Math.round(gi.getLength() * 10) / 10.0 + "," + gi.getNumPE() + "," + gi.getRam() + "," + gi.getUser() + "," + gi.getGridlet().getInst() + 
+                    "," + jobValue + "," + ri.resource.getInstitute() + "," + queue_name + "," + curCost + "," + ri.resource.getResourceID() 
+                    + "," + gi.getGridlet().getQueue() + "," + gi.getGridlet().getProperties();
 
             //out.writeStringWriter(user_dir + "/jobs" + prob + ".csv", line.replace(".", ","));
             //out.writeStringWriter(pw, line.replace(".", ","));
@@ -629,22 +672,7 @@ public class ResultCollector {
             ex.printStackTrace();
         }
 
-        for (int j = 0; j < resourceInfoList.size(); j++) {
-            ResourceInfo ri = (ResourceInfo) resourceInfoList.get(j);
-            if (gridlet_received.getResourceID() == ri.resource.getResourceID()) {
-                // we lower the load of resource, update info about overall tardiness and exit cycle
-                ri.lowerResInExec(gi);
-                ri.prev_tard += g_tard;
-                if (g_tard <= 0.0) {
-                    ri.prev_score++;
-                }
-                cost += gi.getNumPE() * gi.getLength() * ri.resource.getCostPerSec()/3600;
-                if(gi.getNumNodes() > 1){
-                    jobValue = Math.min(gi.getNumPE() * gi.getLength() * ri.resource.getCostPerSec(), jobValue * 2);
-                }
-                break;
-            }
-        }
+        
         value += jobValue;
     }
 
@@ -733,6 +761,13 @@ public class ResultCollector {
         this.awrt = 0.0;
         this.awsd = 0.0;
         this.sa_total = 0.0;
+        this.value = 0.0;
+        this.missed = 0;
+        this.cost = 0.0;
+        this.hpJobs = 0;
+        this.mpJobs = 0;
+        this.lpJobs = 0;
+        
 
         try {
             out.closeWriter(pw);

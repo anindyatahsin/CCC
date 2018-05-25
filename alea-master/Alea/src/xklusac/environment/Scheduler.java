@@ -652,37 +652,47 @@ public class Scheduler extends GridSim {
          }
          */
         if(data_set.contains("vtech")){
-            all_queues.add(lab_q); //high
-            all_queues.add(p100_dev_q); //med
-            all_queues.add(dev_q); //med
-            all_queues.add(largemem_q); //med
-            all_queues.add(vis_q); //med
-            all_queues.add(p100_normal_q); //low
-            all_queues.add(normal_q); //low
-            all_queues.add(open_q);  //low
+            all_queues.addLast(lab_q); //high
+            all_queues.addLast(p100_dev_q); //high
+            all_queues.addLast(dev_q); //high
+            all_queues.addLast(vis_q); //med
+            all_queues.addLast(largemem_q); //med
+            all_queues.addLast(p100_normal_q); //med
+            all_queues.addLast(normal_q); //low
+            all_queues.addLast(open_q);  //low
+            all_queues.addLast(high_q);
+            all_queues.addLast(regular_q);
+            all_queues.addLast(low_q);
         }
         else if(data_set.contains("uva")){
-            all_queues.add(lab_q); // high
-            all_queues.add(dev); //high
-            all_queues.add(largemem); // med
-            all_queues.add(gpu); // med
-            all_queues.add(knl); //med
-            all_queues.add(parallel); // low
-            all_queues.add(standard); // low
+            all_queues.addLast(lab_q); // high
+            all_queues.addLast(dev); //high
+            all_queues.addLast(knl); //high
+            all_queues.addLast(gpu); // med
+            all_queues.addLast(largemem); // med
+            all_queues.addLast(parallel); // low
+            all_queues.addLast(standard); // low
+            all_queues.addLast(high_q);
+            all_queues.addLast(regular_q);
+            all_queues.addLast(low_q);
         }
         else if(data_set.contains("iu")){
-            all_queues.add(debug_gpu);
-            all_queues.add(debug_cpu);
-            all_queues.add(gpu);
-            all_queues.add(longq);
-            all_queues.add(cpu);
-            all_queues.add(normal);
-            all_queues.add(serial);
+            all_queues.addLast(lab_q);
+            all_queues.addLast(debug_gpu); // high
+            all_queues.addLast(debug_cpu); // high
+            all_queues.addLast(cpu);    // high
+            all_queues.addLast(gpu);    // med
+            all_queues.addLast(normal); // low
+            all_queues.addLast(serial); // low
+            all_queues.addLast(longq);  // low
+            all_queues.addLast(high_q);
+            all_queues.addLast(regular_q);
+            all_queues.addLast(low_q);
         }
         else if(data_set.contains("ccc")){
-            all_queues.add(regular_q);
             all_queues.add(high_q);
-            all_queues.add(low_q);
+            all_queues.add(regular_q);
+            all_queues.add(low_q);            
         }
         
         
@@ -843,7 +853,7 @@ public class Scheduler extends GridSim {
         super.sim_schedule(this.getEntityId(this.getEntityName()), fairdelay + 2, AleaSimTags.SCHEDULER_PRINT_FIRST_JOB_IN_QUEUE);
         //System.out.printerr("Simulation start time");
         // Accept events until the simulation is finished
-        while (!end_of_submission || received < in_job_counter) {
+        while ((!end_of_submission || received < in_job_counter) && Math.round(clock()) < 2678400) {
 
             Sim_event ev = new Sim_event();
             sim_get_next(ev);
@@ -1100,7 +1110,7 @@ public class Scheduler extends GridSim {
                     /*if ((algorithm >= 9 && algorithm != 12) || algorithm == 4) {
                         System.out.println("<<< " + received + " so far completed, in schedule = " + getScheduleSize() + " jobs, at time = " + Math.round(clock()) + " running = " + getRunningJobs() + " jobs free CPUs = " + getFreeCPUs());
                     } else {*/
-                        String dated = new java.text.SimpleDateFormat("dd-MM-yyyy").format(new java.util.Date(Math.round(clock()) * 1000));
+                        String dated = new java.text.SimpleDateFormat("MM-dd-yyyy").format(new java.util.Date(ExperimentSetup.firstArrival * 1000L + Math.round(clock()) * 1000L));
                         System.out.println("<<< " + received + " so far completed, in queue/schedule = " + getQueueSize() + " jobs, requiring = " + getQueueCPUSize() + " CPUs, at time = " + Math.round(clock()) + " running = " + getRunningJobs() + " jobs free CPUs = " + getFreeCPUs()+", Day: "+dated);
                         /*
                          * Enumeration keys = ExperimentSetup.queues.keys(); int
@@ -1221,9 +1231,12 @@ public class Scheduler extends GridSim {
                     /*if ((algorithm >= 9 && algorithm != 12) || algorithm == 4) {
                         System.out.println(">>> " + in_job_counter + " so far arrived, in schedule = " + getScheduleSize() + " jobs, at time = " + Math.round(clock()) + " running = " + getRunningJobs() + "jobs,  FREE CPUs = " + getFreeCPUs());
                     } else {*/
-                        String dated = new java.text.SimpleDateFormat("dd-MM-yyyy").format(new java.util.Date(Math.round(clock()) * 1000));
+                
+                        String dated = new java.text.SimpleDateFormat("MM-dd-yyyy").format(new java.util.Date(ExperimentSetup.firstArrival * 1000L + Math.round(clock()) * 1000L));
+                        //String dated = "balchal";
                         //System.out.println(">>> " + in_job_counter + " so far arrived, in queue = " + getQueueSize() + " jobs, at time = " + Math.round(clock()) + " running = " + getRunningJobs() + " jobs, free CPUs = " + getFreeCPUs() + ", #" + queue.getFirst().getID() + " is the first waiting job in queue. Day: " + dated);
-                        System.out.println(">>> " + in_job_counter + " so far arrived, in queue/schedule = " + getQueueSize() + " jobs, requiring = " + getQueueCPUSize() + " CPUs, at time = " + Math.round(clock()) + " running = " + getRunningJobs() + " jobs, free CPUs = " + getFreeCPUs() + ", Day: " + dated);
+                        System.out.println(">>> " + in_job_counter + " so far arrived, in queue/schedule = " + getQueueSize() + " jobs, requiring = " + getQueueCPUSize() + " CPUs, at time = " + Math.round(clock()) 
+                                + " running = " + getRunningJobs() + " jobs, free CPUs = " + getFreeCPUs() + ", Day: " + dated );
                     
                 }
 
@@ -1466,9 +1479,10 @@ public class Scheduler extends GridSim {
      */
     public static boolean isSuitable(ResourceInfo ri, GridletInfo gi) {
         if (!ExperimentSetup.failures) {
-            HashMap<Integer, Boolean> h = gi.getResourceSuitable();
+            HashMap<Integer, Boolean> h = gi.getGridlet().getResourceSuitable();
             // System.out.println(h);
             boolean suitable = h.get(ri.resource.getResourceID());
+            //System.out.println(gi.getGridlet().getGridletID() + ":" + h);
             return suitable;
             //String req_p[] =  
         } else if (!reqs) {
@@ -1796,14 +1810,10 @@ public class Scheduler extends GridSim {
                 if (isGridletSuitable(ri, gi)) {
                     cpuok = true;
                 }
-                HashMap h = gi.getResourceSuitable();
-                h.put(ri.resource.getResourceID(), true);
-                executable = true;
-
-            } else {
-                HashMap h = gi.getResourceSuitable();
-                h.put(ri.resource.getResourceID(), false);
-            }
+                HashMap h = gi.getGridlet().getResourceSuitable();
+                
+                executable = executable || (boolean)h.get(ri.resource.getResourceID());
+            } 
         }
 
         //System.out.println(gi.getID()+": cannot run | CPU="+cpuok+" RAM="+ramok+" req: ppn="+gi.getPpn()+ " nodes="+gi.getNumNodes()+" RAM="+gi.getRam());

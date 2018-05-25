@@ -1,6 +1,8 @@
 package xklusac.environment;
 
 import gridsim.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
@@ -68,6 +70,47 @@ public class ComplexGridlet extends Gridlet {
     private String onJobCompl = null;
     private String onJobFail = null;
     private String inst;
+    private HashMap<Integer, Boolean> resourceSuitable;
+
+    public HashMap<Integer, Boolean> getResourceSuitable() {
+        return resourceSuitable;
+    }
+
+    public void setResourceSuitable(HashMap<Integer, Boolean> resourceSuitable) {
+        this.resourceSuitable = resourceSuitable;
+    }
+    
+    /**
+     * @param rsInfo list of all the available resources to check if the resource is suitable
+     */
+    public void setResourceSuitable(ArrayList<ResourceInfo> rsInfo) {
+        //this.resourceSuitable = resourceSuitable;
+        resourceSuitable = new HashMap<>();
+        for(int i = 0; i < rsInfo.size(); i++){
+            ResourceInfo ri = rsInfo.get(i);
+            boolean match = true;
+            if(getProperties().equals("")){ 
+                resourceSuitable.put(ri.resource.getResourceID(), match);
+                continue;
+            }
+            String[] ri_p = ri.resource.getProperties().split(",");
+            String[] gi_p = this.getProperties().split(",");
+            
+            int j = 0, k = 0;
+            
+            for(j = 0; j < gi_p.length; j++){
+                for(k = 0; k < ri_p.length; k++){
+                    if(gi_p[j].equals(ri_p[k])) break;
+                }
+                if(k == ri_p.length){ 
+                    match = false;
+                    break;
+                }
+            }
+            resourceSuitable.put(ri.resource.getResourceID(), match);
+        }
+        //System.out.println(getGridletID() + ":" + getProperties() + ":" + resourceSuitable);    
+    }
 
     public String getInst() {
         return inst;
@@ -143,6 +186,32 @@ public class ComplexGridlet extends Gridlet {
         this.setPpn(ppn);
         this.setNumNodes(numNodes);
         this.setInst(institute);
+    }
+    public ComplexGridlet(int gridletID, String user, long job_limit, double gridletLength, double estimatedLength, long gridletFileSize,
+            long gridletOutputSize, String oSrequired, String archRequired,
+            double arrival_time, double due_date, int priority, int numPE, double estMach, String queue, String properties, double percentage, long ram, int numNodes, int ppn) {
+        // call Gridlet constructor
+        super(gridletID, gridletLength, gridletFileSize, gridletOutputSize);
+        this.setOpSystemRequired(oSrequired);
+        this.setArchRequired(archRequired);
+        this.setArrival_time(arrival_time);
+        this.setRelease_date(arrival_time);
+        this.setDue_date(due_date);
+        this.setPriority(priority);
+        this.setNumPE(numPE);
+        this.setEstimatedLength(estimatedLength);
+        this.setEstimatedMachine(estMach);
+        this.setQueue(queue);
+        this.setRepeated(false);
+        this.setProperties(properties);
+        this.setUser(user);
+        this.setJobLimit(job_limit);
+        this.setExpectedFinishTime(0.0);
+        this.setPercentage(percentage);
+        this.setRam(ram);
+        this.setPpn(ppn);
+        this.setNumNodes(numNodes);
+        //this.setInst(institute);
     }
 
     /**
