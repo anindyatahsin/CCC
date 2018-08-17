@@ -122,6 +122,14 @@ class AdvancedSpaceShared extends AllocPolicy {
                 used_usage = 0.0;
                 break;
             }
+            
+            /*if (ev.get_tag() == GridSimTags.GRIDLET_RETURN) {
+                ComplexGridlet gridlet_received = (ComplexGridlet) ev.get_data();
+                if(gridlet_received.getGridletStatus() == Gridlet.CANCELED){
+                    System.out.println("Canceling Gridlet " + gridlet_received.getGridletID());
+                    //this.gridletCancel(, resId_);
+                }
+            }*/
 
             // failure finished - restart this resource
             if (ev.get_tag() == AleaSimTags.FAILURE_FINISHED) {
@@ -228,6 +236,14 @@ class AdvancedSpaceShared extends AllocPolicy {
         long time_limit = ((ComplexGridlet) gl).getJobLimit();
         double expected_runtime = gl.getGridletLength() / this.resource_.getMIPSRatingOfOnePE();
         // removed time_limit + 300
+        if(gl.getGridletID() == 119486){
+            for(int xx = 0; xx < this.gridletInExecList_.size(); xx++){
+                ResGridlet gxx = this.gridletInExecList_.get(xx);
+                System.out.println(gxx.getGridletID()+ " " + gxx.getGridlet().getGridletStatusString() + " " + gxx.getGridlet().getNumPE());
+            }
+            System.out.println("Exec:" + this.gridletInExecList_.size() + "\tQueue:" + this.gridletQueueList_.size() + "\tPaused:" + this.gridletPausedList_.size());
+            
+        }
         if (expected_runtime > (time_limit)) {
             // we have to shorten the job so that the time limit is not exceeded
             //System.out.println(gl.getGridletID()+" exceeds time limit by :"+ Math.round(expected_runtime - time_limit)/60+" minutes, limit = "+(time_limit)+" sec.");
@@ -271,9 +287,10 @@ class AdvancedSpaceShared extends AllocPolicy {
         }
         // if no available PE then put the ResGridlet into a Queue list
         if (success == false && failure == false) {
-            rgl.setGridletStatus(Gridlet.QUEUED);
+            rgl.setGridletStatus(Gridlet.FAILED_RESOURCE_UNAVAILABLE);
             System.out.println(rgl.getGridletID() + " = Gridlet QUEUED because free:" + this.getNumFreePE() + " while reqested:" + rgl.getNumPE() + " on: " + this.resource_.getResourceName() + " Potential problem +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-            gridletQueueList_.add(rgl);
+            //gridletQueueList_.add(rgl);
+            //sim_schedule(GridSim.getEntityId("Alea_3.0_scheduler"), 0.0, GridSimTags.GRIDLET_CANCEL, gl);
         }
         
         //System.out.println(rgl.getGridletID()+" >>> "+rgl.getGridlet().getGridletStatusString());
@@ -287,6 +304,7 @@ class AdvancedSpaceShared extends AllocPolicy {
         if (failure == false && success == true) {
             sim_schedule(GridSim.getEntityId("Alea_3.0_scheduler"), 0.0, AleaSimTags.GRIDLET_STARTED, gl);
         }
+        
     }
 
     /**
@@ -897,9 +915,8 @@ class AdvancedSpaceShared extends AllocPolicy {
             obj = (ResGridlet) gridletInExecList_.get(i);
 
             if (obj.getRemainingGridletLength() == 0.0) {
-
-                gridletInExecList_.remove(obj);
                 gridletFinish(obj, Gridlet.SUCCESS);
+                gridletInExecList_.remove(obj);
                 continue;
             }
 
@@ -975,7 +992,8 @@ class AdvancedSpaceShared extends AllocPolicy {
         // move Queued Gridlet into exec list       
         allocateQueueGridlet();
     }
-
+    
+    
     /**
      * Handles an operation of canceling a Gridlet in either execution list
      * or paused list.
@@ -991,8 +1009,10 @@ class AdvancedSpaceShared extends AllocPolicy {
         ResGridlet rgl = null;
 
         // Find in EXEC List first
-        int found = super.findGridlet(gridletInExecList_, gridletId, userId);
-        if (found >= 0) {
+        //int found = super.findGridlet(gridletInExecList_, gridletId, userId);
+        int found = gridletInExecList_.indexOf(gridletId, userId);
+        boolean wasFound = false;
+        while (found >= 0) {
             // update the gridlets in execution list up to this point in time
             updateGridletProcessing();
 
@@ -1003,16 +1023,30 @@ class AdvancedSpaceShared extends AllocPolicy {
             // instead.
             if (rgl.getRemainingGridletLength() == 0.0) {
                 rgl.setGridletStatus(Gridlet.SUCCESS);
+                System.err.println("Can't cancel the job already finished");
             } else {
                 rgl.setGridletStatus(Gridlet.CANCELED);
             }
 
             // Set PE on which Gridlet finished to FREE
-            super.resource_.setStatusPE(PE.FREE, rgl.getMachineID(),
-                    rgl.getPEID());
+            
+            if (rgl.getNumPE() > 1) {
+                int[] machines = rgl.getListMachineID();
+                int[] pes = rgl.getListPEID();
+                for (int i = 0; i < machines.length; i++) {
+                    // because gridlet's setMachineAndPEID(int machineID, int peID) (ResGridlet class)
+                    // generates always pair machine_ID:PE_ID into 2 arrays, these arrays have always the same length
+                    super.resource_.setStatusPE(PE.FREE, machines[i], pes[i]);
+                }
+            } else {
+                super.resource_.setStatusPE(PE.FREE, rgl.getMachineID(), rgl.getPEID());
+            }
             allocateQueueGridlet();
-            return rgl;
+            found = gridletInExecList_.indexOf(gridletId, userId);
+            wasFound = true;
         }
+        if(wasFound)
+            return rgl;
 
         // Find in QUEUE list
         found = super.findGridlet(gridletQueueList_, gridletId, userId);
@@ -1032,7 +1066,8 @@ class AdvancedSpaceShared extends AllocPolicy {
         }
         return rgl;
     }
-
+    
+    
     public void processOtherEvent(Sim_event ev) {
         if (ev == null) {
             System.out.println(resName_ + ".processOtherEvent(): " +
@@ -1248,7 +1283,13 @@ class AdvancedSpaceShared extends AllocPolicy {
                 }
             }
         } else {
-            free = this.resource_.getNumFreePE();
+            for (int i = 0; i < mlist.size(); i++) {
+                Machine m = mlist.getMachine(i);
+                if (m.getFailed() == false) {
+                    free += m.getNumFreePE();
+                }
+            }
+            //free = this.resource_.getNumFreePE();
         }
         return free;
     }

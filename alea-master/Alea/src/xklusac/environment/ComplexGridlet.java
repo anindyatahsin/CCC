@@ -12,7 +12,7 @@ import java.util.LinkedList;
  *
  * @author Dalibor Klusacek
  */
-public class ComplexGridlet extends Gridlet {
+public class ComplexGridlet extends Gridlet implements Cloneable{
 
     /**
      * required architecture
@@ -70,8 +70,25 @@ public class ComplexGridlet extends Gridlet {
     private String onJobCompl = null;
     private String onJobFail = null;
     private String inst;
-    private HashMap<Integer, Boolean> resourceSuitable;
+    private int arrayID;
 
+    public int getArrayID() {
+        return arrayID;
+    }
+
+    public void setArrayID(int arrayID) {
+        this.arrayID = arrayID;
+    }
+    
+    public Object clone() throws
+                   CloneNotSupportedException
+    {
+        return super.clone();
+    }
+    
+    
+    private HashMap<Integer, Boolean> resourceSuitable;
+    
     public HashMap<Integer, Boolean> getResourceSuitable() {
         return resourceSuitable;
     }
@@ -163,7 +180,8 @@ public class ComplexGridlet extends Gridlet {
      */
     public ComplexGridlet(int gridletID, String user, long job_limit, double gridletLength, double estimatedLength, long gridletFileSize,
             long gridletOutputSize, String oSrequired, String archRequired,
-            double arrival_time, double due_date, int priority, int numPE, double estMach, String queue, String properties, double percentage, long ram, int numNodes, int ppn, String institute) {
+            double arrival_time, double due_date, int priority, int numPE, double estMach, String queue, String properties, double percentage, long ram, 
+            int numNodes, int ppn, String institute, int array_size) {
         // call Gridlet constructor
         super(gridletID, gridletLength, gridletFileSize, gridletOutputSize);
         this.setOpSystemRequired(oSrequired);
@@ -186,6 +204,7 @@ public class ComplexGridlet extends Gridlet {
         this.setPpn(ppn);
         this.setNumNodes(numNodes);
         this.setInst(institute);
+        this.setArrayID(arrayID);
     }
     public ComplexGridlet(int gridletID, String user, long job_limit, double gridletLength, double estimatedLength, long gridletFileSize,
             long gridletOutputSize, String oSrequired, String archRequired,

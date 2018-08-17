@@ -6,6 +6,7 @@ package xklusac.algorithms.queue_based;
 
 import java.util.Date;
 import gridsim.GridSim;
+import static gridsim.GridSim.clock;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -112,24 +113,24 @@ public class PBS_PRO implements SchedulingPolicy {
             Scheduler.q3.addLast(gi);
         } 
         
-        else if(scheduler.data_set.contains("iu")){
+        else if(gi.getGridlet().getInst().equals("iu")){
             if (gi.getQueue().equals("normal")) {
                 Scheduler.low_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("debug_gpu")) {
-                Scheduler.debug_gpu.addLast(gi);
+                Scheduler.high_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("debug_cpu")) {
-                Scheduler.debug_cpu.addLast(gi);
+                Scheduler.high_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("cpu16")) {
-                Scheduler.cpu.addLast(gi);
+                Scheduler.low_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
@@ -151,14 +152,19 @@ public class PBS_PRO implements SchedulingPolicy {
             // All remaining non standard queues are considered to be normal
             Scheduler.low_q.addLast(gi);
         }        
-        else if(scheduler.data_set.contains("vtech")) {
+        else if(gi.getGridlet().getInst().equals("vt")) {
             if (gi.getQueue().equals("normal_q")) {
-                Scheduler.normal_q.addLast(gi);
+                Scheduler.regular_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
             if (gi.getQueue().equals("dev_q")) {
-                Scheduler.dev_q.addLast(gi);
+                Scheduler.high_q.addLast(gi);
+                Scheduler.runtime += (new Date().getTime() - runtime1);
+                return;
+            }
+            if (gi.getQueue().equals("deq_q")) {
+                Scheduler.regular_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
@@ -173,7 +179,7 @@ public class PBS_PRO implements SchedulingPolicy {
                 return;
             }
             if (gi.getQueue().equals("p100_dev_q")) {
-                Scheduler.p100_dev_q.addLast(gi);
+                Scheduler.high_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
@@ -183,17 +189,17 @@ public class PBS_PRO implements SchedulingPolicy {
                 return;
             }
             if (gi.getQueue().equals("open_q")) {
-                Scheduler.open_q.addLast(gi);
+                Scheduler.regular_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
 
             // All remaining non standard queues are considered to be normal
-            Scheduler.lab_q.addLast(gi);
+            Scheduler.high_q.addLast(gi);
         }
-        else if(scheduler.data_set.contains("uva")) {
+        else if(gi.getGridlet().getInst().equals("uva")) {
             if (gi.getQueue().contains("dev")) {
-                Scheduler.dev.addLast(gi);
+                Scheduler.high_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
                 return;
             }
@@ -224,9 +230,9 @@ public class PBS_PRO implements SchedulingPolicy {
             }
 
             // All remaining non standard queues are considered to be normal
-            Scheduler.dev.addLast(gi);
+            Scheduler.high_q.addLast(gi);
         }
-        else if(gi.getGridlet().getInst().equals("vt")) {
+        /*else if(gi.getGridlet().getInst().equals("vt")) {
             if (gi.getQueue().equals("normal_q")) {
                 Scheduler.low_q.addLast(gi);
                 Scheduler.runtime += (new Date().getTime() - runtime1);
@@ -339,7 +345,10 @@ public class PBS_PRO implements SchedulingPolicy {
             }
             // All remaining non standard queues are considered to be normal
             Scheduler.high_q.addLast(gi);
-        }
+        }*/
+        
+        
+        
         Scheduler.runtime += (new Date().getTime() - runtime1);
 
     }
@@ -382,6 +391,11 @@ public class PBS_PRO implements SchedulingPolicy {
             for (int i = 0; i < Scheduler.queue.size(); i++) {
                 
                 GridletInfo gi = (GridletInfo) Scheduler.queue.get(i);
+                
+                if(gi.getGridlet().getPriority() == 3 && (clock() - gi.getGridlet().getArrival_time()) > 1800){
+                    gi = (GridletInfo) Scheduler.queue.remove(i);
+                    return scheduled;
+                }
                 ArrayList<ResourceInfo> rsInfoList = Scheduler.resourceInfoList;
                 Collections.sort(rsInfoList, new CostComparator(gi.getGridlet().getInst()));
                 for (int j = 0; j < Scheduler.resourceInfoList.size(); j++) {

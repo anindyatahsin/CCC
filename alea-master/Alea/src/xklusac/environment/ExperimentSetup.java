@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 import xklusac.extensions.*;
 import xklusac.extensions.Queue;
 import xklusac.algorithms.*;
+import xklusac.algorithms.queue_based.CCC_Scheduler;
 import xklusac.plugins.Plugin;
 import xklusac.plugins.PluginConfiguration;
 import xklusac.plugins.PluginFactory;
@@ -324,6 +325,8 @@ public class ExperimentSetup {
 
     public static String data_sets;
     
+    public static String data_param;
+    
     private static String[] dir = new String[4];
     
     private static String[] dirG = new String[5];
@@ -427,7 +430,7 @@ public class ExperimentSetup {
         use_queues = aCfg.getBoolean("use_queues");
         by_queue = aCfg.getBoolean("by_queue");
         data_sets = aCfg.getString("data_set_dir");
-        
+        data_param = aCfg.getString("data_param");
         // if required - start the graphical output using -v parameter
         if (args.length > 0) {
             if (args[0].equals("-v")) {
@@ -443,6 +446,7 @@ public class ExperimentSetup {
         // Similarly machine failures (if simulated) should be placed in a file called e.g., "metacentrum.mwf.failures".
         // Please read carefully the copyright note when using public workload traces!
         String data_sets[] = aCfg.getStringArray("data_sets");
+        //String data_param[] = aCfg.getStringArray("data_param");
         // number of gridlets in data set
         int total_gridlet[] = aCfg.getIntArray("total_gridlet");
         
@@ -839,6 +843,12 @@ public class ExperimentSetup {
                     use_compresion = true;
                     suff = "CONS-Fair-compr.";
                 }
+                
+                if(alg == 25){
+                    policy = new CCC_Scheduler(scheduler);
+                    use_compresion = true;
+                    suff = "CCC_Scheduler";
+                }
 
                 dirG[4] = (sel_alg+1) + "-" + suff;
                 File algDirGraphs = new File(ExperimentSetup.getDirG(DirectoryLevel.GRAPHSALG));
@@ -889,7 +899,7 @@ public class ExperimentSetup {
                         System.out.println("The system has "+Math.round(avail_CPUs) + " CPUs and " + Math.round(avail_RAM/(1024*1024))+" GBs of RAM.");
 
                         // creates job loader
-                        JobLoader job_loader = new JobLoader(job_loader_name, baudRate, total_gridlet[set], data_sets[set], maxPE, minPErating, maxPErating,
+                        JobLoader job_loader = new JobLoader(job_loader_name, baudRate, total_gridlet[set], data_sets[set], ExperimentSetup.data_param, maxPE, minPErating, maxPErating,
                                 arrival_rate_multiplier, pass_count, m_loader.total_CPUs, estimates);
 
                         if (failures) {

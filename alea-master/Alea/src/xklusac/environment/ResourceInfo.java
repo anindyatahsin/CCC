@@ -1,6 +1,8 @@
 package xklusac.environment;
 
+import alea.core.AleaSimTags;
 import gridsim.*;
+import static gridsim.GridSim.clock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,7 +12,8 @@ import xklusac.extensions.BinaryHeap;
 import xklusac.extensions.HeapNode;
 import xklusac.extensions.Hole;
 import xklusac.extensions.StartComparator;
-
+import eduni.simjava.Sim_event;
+import eduni.simjava.Sim_system;
 /**
  * Class ResourceInfo<p>
  * This class stores dynamic information about each resource. E.g., prepared
@@ -31,6 +34,8 @@ public class ResourceInfo {
      * Denotes the total number of PE on Resource
      */
     public int numPE;
+    
+
     /**
      * List of gridletInfos "on Resource"
      */
@@ -133,6 +138,8 @@ public class ResourceInfo {
     double[] r_tusa;
     public MachineList virt_machines;
     String Institute;
+    //AdvancedSpaceShared policy = null;
+            
 
     public String getInstitute() {
         return Institute;
@@ -161,11 +168,11 @@ public class ResourceInfo {
         this.stable_s = false;
         this.setInstitute(resource.getInstitute());
         if (ExperimentSetup.use_RAM) {
-            AdvancedSpaceSharedWithRAM policy = null;
+            AdvancedSpaceSharedWithRAM apolicy = null;
             for (int i = 0; i < ExperimentSetup.local_schedulers.size(); i++) {
-                policy = (AdvancedSpaceSharedWithRAM) ExperimentSetup.local_schedulers.get(i);
-                if (policy.resource_.getResourceID() == this.resource.getResourceID()) {
-                    System.out.println(i + "th allocation policy '" + policy.name + "' is used for the resource no. " + this.resource.getResourceID());
+                apolicy = (AdvancedSpaceSharedWithRAM) ExperimentSetup.local_schedulers.get(i);
+                if (apolicy.resource_.getResourceID() == this.resource.getResourceID()) {
+                    System.out.println(i + "th allocation policy '" + apolicy.name + "' is used for the resource no. " + this.resource.getResourceID());
                     break;
                 }
             }
@@ -190,10 +197,14 @@ public class ResourceInfo {
      */
     public void lowerResInExec(GridletInfo gi) {
         boolean removed = false;
+        
+    
         for (int j = 0; j < resInExec.size(); j++) {
             GridletInfo giRes = (GridletInfo) resInExec.get(j);
-
-            if (giRes.getID() == gi.getID() && giRes.getOwnerID() == gi.getOwnerID()) {
+            //System.err.println(giRes.getID() + " " + gi.getID()); 
+                
+            if (giRes.getGridlet().getGridletID() == gi.getGridlet().getGridletID() && giRes.getOwnerID() == gi.getOwnerID()) {
+                //System.err.println("Paisi tore: " + giRes.getID());
                 resInExec.remove(j);
                 stable = false;
                 stable_w = false;
@@ -204,10 +215,37 @@ public class ResourceInfo {
             }
         }
         if (!removed) {
-            System.out.println("Error removing gi from InExec list.");
+            
+            System.err.println("balchal  ... Error removing " + gi.getID() + " from InExec list.");
+            //return false;
         }
+        //return true;
     }
 
+    public void lowerResInExec(int index) {
+        boolean removed = false;
+        for (int j = 0; j < resInExec.size(); j++) {
+            GridletInfo giRes = (GridletInfo) resInExec.get(j);
+            //System.err.println(giRes.getID() + " " + gi.getID());    
+            if ((int)giRes.getID() == index) {
+                //System.err.println("Paisi tore: " + giRes.getID());
+                resInExec.remove(j);
+                stable = false;
+                stable_w = false;
+                stable_s = false;
+                stable_free = false;
+                removed = true;
+                break;
+            }
+        }
+        if (!removed) {
+            
+            System.err.println("Balchal ... Error removing gi from InExec list.");
+            //return false;
+        }
+        //return true;
+    }
+    
     /**
      * Removes GridletInfo from Resource schedule
      *
@@ -216,7 +254,7 @@ public class ResourceInfo {
     public void lowerResScheduleList(GridletInfo gi) {
         for (int j = 0; j < resSchedule.size(); j++) {
             GridletInfo giRes = (GridletInfo) resSchedule.get(j);
-            if (giRes.getID() == gi.getID() && giRes.getOwnerID() == gi.getOwnerID()) {
+            if (giRes.getGridlet().getGridletID() == gi.getGridlet().getGridletID() && giRes.getOwnerID() == gi.getOwnerID()) {
                 resSchedule.remove(j);
                 stable = false;
                 stable_w = false;
@@ -268,6 +306,106 @@ public class ResourceInfo {
         } else {
             return this.resource.getNumPE();
         }
+    }
+    
+    public GridletInfo findLowPriorityGridlet(GridletInfo curr){
+        GridletInfo gi = null;
+        ArrayList<GridletInfo> ls = resInExec;
+        for(int i = 0; i < ls.size(); i++){
+            gi = ls.get(i);
+            MachineList machines = this.resource.getMachineList();
+            for (int j = 0; j < machines.size(); j++) {
+                Machine machine = machines.get(j);
+                if(gi.getGridlet().getPriority() == 1 && (machine.getNumFreePE() + gi.getNumPE()) >= curr.getNumPE()
+                         && gi.getStatus() == Gridlet.INEXEC){
+                    return gi;
+                }
+            }
+        }
+        return null;
+    }
+    
+    public int findIndex(int id){
+        for (int j = 0; j < resInExec.size(); j++) {
+            GridletInfo giRes = (GridletInfo) resInExec.get(j);
+            if(giRes.getID() == id){
+                return j;
+            }
+        }
+        return -1;
+    }
+    
+    public boolean removeLowPriority(GridletInfo curr, Scheduler scheduler){
+        ArrayList<GridletInfo> ls = resInExec;
+        try{
+            for(int i = ls.size()-1; i >= 0; i--){
+                GridletInfo gi = ls.get(i);
+                if(gi.getGridlet().getPriority() == 1 && gi.getStatus() == Gridlet.INEXEC){
+                    //System.out.println("now removing " + gi.getID() + " with " + gi.getPpn() + " from resInExec " + resInExec.size());
+                    //lowerResInExec(gi.getID());
+                    //
+                    
+                    gi.getGridlet().setGridletStatus(Gridlet.CANCELED);
+                    //if(resInExec.remove(gi)){ 
+
+                    scheduler.sim_schedule(GridSim.getEntityId("Alea_3.0_scheduler"), 0.0, GridSimTags.GRIDLET_RETURN, gi.getGridlet());
+                    //this.lowerResScheduleList(gi);
+                    AdvancedSpaceShared policy = null;
+                    for (int x = 0; x < ExperimentSetup.local_schedulers.size(); x++) {
+                        policy = (AdvancedSpaceShared) ExperimentSetup.local_schedulers.get(x);
+                        if (policy.resource_.getResourceID() == this.resource.getResourceID()) {
+                            //System.out.println(x + "th allocation policy '" + policy.name + "' is used for the resource no. " + this.resource.getResourceID());
+                            break;
+                        }
+                    }
+                    //policy.sim_schedule(GridSim.getEntityId("Alea_3.0_scheduler"), 0.0, GridSimTags.GRIDLET_RETURN, gi.getGridlet());
+                    //System.out.println(policy.getNumFreePE());
+                    policy.gridletCancel(gi.getGridlet().getGridletID(), gi.getGridlet().getUserID());
+                    //System.out.println(policy.getNumFreePE());
+                    //Scheduler.low_q.add(gi);
+                    System.out.println("now removing " + gi.getID() + " with " + gi.getPpn() + " from resInExec " + resInExec.size());
+                    this.lowerResInExec(gi);
+                    
+                    //}    
+                    //else{
+                    //    System.out.println("Hairlam na to ...");
+                    //}
+                    //this.forceUpdate(clock());
+                    //this.u
+                    /*AdvancedSpaceShared policy = null;
+                    for (int j = 0; j < ExperimentSetup.local_schedulers.size(); j++) {
+                        policy = (AdvancedSpaceShared) ExperimentSetup.local_schedulers.get(j);
+                        if (policy.resource_.getResourceID() == this.resource.getResourceID()) {
+                            System.out.println(j + "th allocation policy '" + policy.name + "' is used for the resource no. " + this.resource.getResourceID());
+                            break;
+                        }
+                    }
+                    policy.gridletCancel(gi.getGridlet().getGridletID(), gi.getOwnerID());
+                    */
+                    //gi.getPEs().clear();
+                    //gi.getGridlet().ge
+                    //virt_machines.setNumFreePEs;
+                    //i--;
+                    
+                    
+                    
+                    //System.out.println("now removed " + gi.getID() + " from resInExec " + resInExec.size());
+                     if(canExecuteNow(curr)){
+                        System.err.println(curr.getID() + " can and should now able to run " + this.getNumBusyPE()
+                            + " busy " + this.getNumFreePE() + " free " + this.getNumRunningPE() + " running");
+                        return true;
+                    }else{
+                        System.err.println("Still can't run " + curr.getID() + " required " + curr.getPpn()
+                            + " available " + this.getNumFreePE());
+                        //return false;
+                    }
+                }
+            }
+            
+        }catch(Exception ex){
+            return false;
+        }
+        return canExecuteNow(curr);
     }
 
     /**
@@ -477,6 +615,24 @@ public class ResourceInfo {
         // all machines tested and not enough CPUs/RAM found to execute job now
         return false;
 
+    }
+    
+    public boolean canExecuteHighPriority(GridletInfo gi){
+        int getLowInExec = 0;
+        ArrayList<GridletInfo> ls = resInExec;
+        for(int i = 0; i < ls.size(); i++){
+            GridletInfo gl = ls.get(i);
+            if(gl.getGridlet().getPriority() == 1){
+                getLowInExec += gl.getNumPE();
+            }
+        }
+        if ((this.getNumFreePE() + getLowInExec) >= gi.getNumPE() ) {
+            //System.out.println(this.getNumFreePE() + getLowInExec + " is free and " + gi.getID() + " needs " + gi.getNumPE()
+            //    + " where " + getLowInExec + " is busy with low priority");
+            return true;
+        } else {
+            return false;
+        }
     }
 
     // oznaci a odecte CPU a RAM u vsech virt uzlu, kde muze bezet uloha

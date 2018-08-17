@@ -84,7 +84,7 @@ public class MachineLoader {
         // create resources and machines from file
         for (int j = 0; j < lines.size(); j++) {
 
-            String[] values = ((String) lines.get(j)).split("\t");
+            String[] values = ((String) lines.get(j)).split("\\s+");
             //System.out.println(lines.get(j));
             if(values[0].contains(";")){continue;}
             int id = Integer.parseInt(values[0]);
@@ -149,6 +149,13 @@ public class MachineLoader {
             String institute = values[7];
             if(values.length > 8){
                 properties = values[8];
+            }
+            if(ExperimentSetup.data_sets.contains("ccc")){
+                if(properties.equals(""))
+                    properties += institute;
+                else{
+                    properties += "," + institute;
+                }
             }
 
             //name = name;

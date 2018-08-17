@@ -266,6 +266,12 @@ public class ComplexGridResource extends GridResource {
             case GridSimTags.GRIDLET_CANCEL:
                 processGridlet(ev, GridSimTags.GRIDLET_CANCEL);
                 break;
+                
+            /*case GridSimTags.GRIDLET_RETURN:
+                ComplexGridlet gridlet_received = (ComplexGridlet) ev.get_data();
+                if(gridlet_received.getGridletStatus() == Gridlet.CANCELED)
+                    processGridlet(ev, GridSimTags.GRIDLET_CANCEL);
+                break;*/
 
             // Pauses a previously submitted Gridlet
             case GridSimTags.GRIDLET_PAUSE:

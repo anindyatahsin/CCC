@@ -33,12 +33,12 @@ public class JobLoader {
     boolean estimates;
     
     /** Creates a new instance of JobLoader */
-    public JobLoader(String name, double baudRate, int total_jobs, String data_set, int maxPE, int minPErating, int maxPErating, double multiplier, 
+    public JobLoader(String name, double baudRate, int total_jobs, String data_set, String data_param, int maxPE, int minPErating, int maxPErating, double multiplier, 
             int exp, int totPEs, boolean estimates) {
         this.name = name;
         this.baudRate = baudRate;
         this.total_jobs = total_jobs;
-        this.data_set = data_set;
+        this.data_set = data_set + "-" + data_param;
         this.maxPE = maxPE;
         this.minPErating = minPErating;
         this.maxPErating = maxPErating;

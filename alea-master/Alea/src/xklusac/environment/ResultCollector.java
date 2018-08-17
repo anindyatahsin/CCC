@@ -1,4 +1,4 @@
-/*
+ /*
  * ResultCollector.java
  *
  * Created on 4. listopad 2009, 12:14
@@ -58,10 +58,11 @@ public class ResultCollector {
     double day_usage = 0.0;
     double week_usage = 0.0;
     int week_count = 0;
-    HashMap<String,Double> value_i = new HashMap<>();
-    HashMap<String,Double> cost_i = new HashMap<>();
+    //HashMap<String,Double> value_i = new HashMap<>();
+    HashMap<Integer,Integer> failed_count = new HashMap<>();
     double value = 0.0;
     double cost = 0.0;
+    
     //double run_time = 0.0;
     /**
      * denotes total flow time
@@ -201,7 +202,7 @@ public class ResultCollector {
         String headersOfPlugins = generatePluginHeaders(pluginHeaders);
 
         try {
-            out.writeString(user_dir + "/Results(" + problem + ").csv", "1/" + data_set
+            out.writeString(user_dir + "/Results(" + problem + ")-" + ExperimentSetup.data_param + ".csv", "1/" + data_set
                     + ",submit.,compl.,killed,resp_time,runtime,sch-cr-time,makespan,weigh_usg,class_usg,tardiness,wait,sld,awrt,awsd,s_resp,s_wait,s_sld,bounded_sld,backfilled, value,cost,hpJobs,mpJobs,lpJobs,failed," + headersOfPlugins);
             out.writeString(user_dir + "/WGraphs(" + problem + ").csv", waxis);
             out.writeString(user_dir + "/SGraphs(" + problem + ").csv", saxis);
@@ -328,7 +329,7 @@ public class ResultCollector {
             }
 
             out.writeString(user_dir + "/Users" + prob + ".csv", fair);
-            out.writeString(user_dir + "/Results(" + problem + ").csv", suff + ","
+            out.writeString(user_dir + "/Results(" + problem + ")-" + ExperimentSetup.data_param + ".csv", suff + ","
                     + Math.round(submitted * 100.0) / (experiment_count * 100.0) + ","
                     + Math.round(completed_jobs * 100.0) / (experiment_count * 100.0) + ","
                     + Math.round(neg_score * 100.0) / (experiment_count * 100.0) + ","
@@ -355,7 +356,11 @@ public class ResultCollector {
                     + Math.round(lpJobs * 100.0) / (experiment_count * 100.0) + ","
                     + Math.round(missed * 100.0) / (experiment_count * 100.0) + ","
                     + pluginResultString);
-
+            StringBuilder failedList = new StringBuilder();
+            for(int key : failed_count.keySet()){
+                failedList.append(key + "," + failed_count.get(key) + "\n");
+            }
+            out.writeString(user_dir + "/Failed-Count" + prob + ".csv", failedList.toString());
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -441,16 +446,20 @@ public class ResultCollector {
             cpu_time = Math.max(1.0, gi.getGridlet().getActualCPUTime());
             mips = gridlet_received.getGridletFinishedSoFar();
             arrival = gi.getGridlet().getArrival_time();
-            System.out.println(gi.getID() + " returned failed, time = " + GridSim.clock());
+            System.err.println(gi.getID() + " returned failed, time = " + GridSim.clock());
 
         } else if (gridlet_received.getGridletStatus() == Gridlet.CANCELED) {
             failed++;
+            failed_count.put(gridlet_received.getGridletID(), failed_count.getOrDefault(gridlet_received.getGridletID(), 0) + 1);
             finish_time = GridSim.clock();
             cpu_time = 0.0;
             arrival = gi.getGridlet().getArrival_time();
             mips = 0.0;
-            System.out.println(gi.getID() + " returned canceled, time = " + GridSim.clock());
-
+            System.err.println(gi.getID() + " returned canceled, time = " + GridSim.clock()
+                + "@ resource " + gridlet_received.getResourceID());
+            ExperimentSetup.policy.addNewJob(gi);
+            
+            return;
         } else {
             success++;
             finish_time = gi.getGridlet().getFinishTime();
@@ -487,10 +496,10 @@ public class ResultCollector {
         job_time += gi.getNumPE() * cpu_time;
         wjob_time += gi.getNumPE() * gridlet_received.getGridletFinishedSoFar();
         flow_time += response;
-        String queue = gi.getQueue();
+        //String queue = gi.getQueue();
         double jobValue = 0;
         //System.out.println("ID: " + gi.getID() + " Inst: " + gi.getGridlet().getInst());
-        if(gi.getGridlet().getInst().equals("vt")){
+        /*if(gi.getGridlet().getInst().equals("vt")){
             if(queue.contains("lab") || queue.contains("dev") || queue.contains("deq") ){
                 if(finish_time > gridlet_received.getDue_date()){
                     //jobValue = gi.getNumPE() * cpu_time / 3600;
@@ -582,8 +591,27 @@ public class ResultCollector {
                     }   
                 }
             }
-        }
+        }*/
         
+        if(gi.getGridlet().getPriority() == 3){
+            if(Math.max(0.0, (response - cpu_time)) > gridlet_received.getDue_date()){
+                //jobValue = gi.getNumPE() * gi.getLength() / 3600;
+                jobValue = 0;
+                missed++;
+            }
+            else{
+                jobValue = 2 * gi.getNumPE() * gi.getLength() / 3600;
+                hpJobs++;
+            }
+        }
+        else if(gi.getGridlet().getPriority() == 2){
+            jobValue = gi.getNumPE() * gi.getLength() / 3600;
+            mpJobs++;
+        }
+        else if(gi.getGridlet().getPriority() == 1){
+            jobValue = 0.5 * gi.getNumPE() * gi.getLength() / 3600;
+            lpJobs++;
+        }
         String properties = gi.getProperties();
         if(properties.contains("gpu") || properties.contains("vis_q") || properties.contains("p100")){
             jobValue = jobValue * 5;
@@ -624,7 +652,7 @@ public class ResultCollector {
             // giID - wait - runtime - userID - numPE - ram - arrival - queue
             out.writeStringWriterErr(pw2, gridlet_received.getGridletID() + "," + Math.max(0.0, (response - cpu_time))
                     + "," + gi.getLength() + "," + gi.getUser() + "," + gi.getNumPE() + "," + gi.getRam() + "," + gi.getRelease_date() + "," + gi.getQueue()
-                    + "," + queue_name);
+                    + "," + gi.getGridlet().getPriority());
             String prob = "_";
             prob += ExperimentSetup.algID + "_" + ExperimentSetup.name;
 
@@ -646,12 +674,12 @@ public class ResultCollector {
                 if (gridlet_received.getResourceID() == ri.resource.getResourceID()) {
                     // we lower the load of resource, update info about overall tardiness and exit cycle
                     ri.lowerResInExec(gi);
+
                     ri.prev_tard += g_tard;
                     if (g_tard <= 0.0) {
                         ri.prev_score++;
                     }
                     curCost = gi.getNumPE() * gi.getLength() * ri.resource.getCostPerSec()/3600;
-                    
                     break;
                 }
             }
@@ -661,8 +689,8 @@ public class ResultCollector {
                 return;
             }
             String line = gridlet_received.getGridletID() + "," + Math.round(gi.getRelease_date()) + "," + Math.round(Math.max(0.0, (response - cpu_time)) * 10) / 10.0
-                    + "," + Math.round(gi.getLength() * 10) / 10.0 + "," + gi.getNumPE() + "," + gi.getRam() + "," + gi.getUser() + "," + gi.getGridlet().getInst() + 
-                    "," + jobValue + "," + ri.resource.getInstitute() + "," + queue_name + "," + curCost + "," + ri.resource.getResourceID() 
+                    + "," + Math.round(gi.getLength() * 10) / 10.0 + "," + gi.getNumPE() + "," + "" + "," + gi.getUser() + "," + gi.getGridlet().getInst() + 
+                    "," + jobValue + "," + ri.resource.getInstitute() + "," + gridlet_received.getPriority() + "," + curCost + "," + ri.resource.getResourceID() 
                     + "," + gi.getGridlet().getQueue() + "," + gi.getGridlet().getProperties();
 
             //out.writeStringWriter(user_dir + "/jobs" + prob + ".csv", line.replace(".", ","));

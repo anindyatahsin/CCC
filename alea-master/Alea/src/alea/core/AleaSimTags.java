@@ -150,5 +150,7 @@ public class AleaSimTags {
     
     public static final int AGENT_ONJOBFAIL = TAG_BASE + 206;
     
+    public static final double HP_THRESHOLD = 1800.0;
+    
     
 }

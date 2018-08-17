@@ -16,7 +16,7 @@ import java.util.LinkedList;
  *
  * @author Dalibor Klusacek
  */
-public class GridletInfo {
+public class GridletInfo implements Cloneable{
 
     /**
      * owner id
@@ -119,6 +119,7 @@ public class GridletInfo {
     private int numNodes;
     private int ppn;
     private String inst;
+    private int array_size;
 
     public String getInst() {
         return inst;
