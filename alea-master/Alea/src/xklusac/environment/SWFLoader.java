@@ -223,6 +223,7 @@ public class SWFLoader extends GridSim {
                     line = line.substring(1);
                 }*/
                 //System.out.println("error1 = "+line+" at gi = "+j);
+                if(line == null) return null;
                 if(!data_set.contains("ccc"))
                     values = line.split("\\s+");
                 else
@@ -457,6 +458,7 @@ public class SWFLoader extends GridSim {
                         else{
                             properties += ",gpu";
                         }
+                        
                     }
                     else if(queue.contains("shared") || queue.contains("batch")){
                         if(properties.equals(""))
@@ -493,6 +495,9 @@ public class SWFLoader extends GridSim {
                     else{
                         properties += ",gpu";
                     }
+                    if(data_set.contains("iu")){
+                        properties += ",bigred";
+                    }
                 }
                 else if(queue.contains("shared") || queue.contains("batch")){
                     if(properties.equals(""))
@@ -500,7 +505,20 @@ public class SWFLoader extends GridSim {
                     else{
                         properties += ",largemem";
                     }
+                    if(data_set.contains("iu")){
+                        properties += ",mason";
+                    }
                 }
+                else{
+                    if(data_set.contains("iu")){
+                        if(properties.equals(""))
+                            properties += "bigred";
+                        else{
+                            properties += ",bigred";
+                        }
+                    }
+                }
+                
             }
         }
         

@@ -595,8 +595,8 @@ public class ResultCollector {
         
         if(gi.getGridlet().getPriority() == 3){
             if(Math.max(0.0, (response - cpu_time)) > gridlet_received.getDue_date()){
-                //jobValue = gi.getNumPE() * gi.getLength() / 3600;
-                jobValue = 0;
+                jobValue = gi.getNumPE() * gi.getLength() / 3600;
+                //jobValue = 0;
                 missed++;
             }
             else{

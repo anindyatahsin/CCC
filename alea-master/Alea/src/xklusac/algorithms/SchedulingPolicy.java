@@ -21,4 +21,9 @@ public interface SchedulingPolicy {
     /** Selects job for execution using applied strategy */
     public int selectJob();
 
+    //public void addNewJob(GridletInfo gi, int i);
+
+    default public void addNewJob(GridletInfo gi, int i) {
+        return;
+    }
 }
