@@ -333,7 +333,7 @@ public class CCC_Scheduler implements SchedulingPolicy{
 
                 }
                 else if(gi.getGridlet().getPriority() == 3){
-                    if(gi.getGridlet().getPriority() == 3 && (clock() - gi.getGridlet().getArrival_time()) > 1800){
+                    if(gi.getGridlet().getPriority() == 3 && (clock() - gi.getGridlet().getArrival_time()) > 600){
                         //gi = (GridletInfo) Scheduler.queue.remove(i);
                         //ExperimentSetup.policy.addNewJob(gi, 2);
                         //return scheduled;

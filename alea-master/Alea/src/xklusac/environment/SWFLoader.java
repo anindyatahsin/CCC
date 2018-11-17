@@ -393,7 +393,7 @@ public class SWFLoader extends GridSim {
             priority = 2;
         } else if(values[13].equals("hp")){
             priority = 3;
-            deadline = 30 * 60;
+            deadline = 10 * 60;
         
         }
 
